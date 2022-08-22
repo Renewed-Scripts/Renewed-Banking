@@ -1,0 +1,109 @@
+:root {
+    --clr-primary: #1e3956;
+    --clr-primary-light: #2e475d;
+    --clr-primary-dark: transparant;
+
+    --clr-green: #93f074;
+    --clr-orange: #f5a067;
+    --clr-grey: #dfe1d6;
+
+    --font-family: "Roboto", sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    outline: none;
+}
+a,
+img,
+button,
+input,
+label,
+select,
+span,
+i {
+    display: inline-block;
+}
+a {
+    text-decoration: none;
+    color: inherit;
+}
+ul {
+    list-style: none;
+}
+img {
+    width: 100%;
+    height: 100%;
+}
+html {
+    font-size: 62.5%;
+}
+body {
+    min-height: 100vh;
+    font-family: var(--font-family);
+    background-color: var(--clr-primary-dark);
+    color: #fff;
+}
+
+h3.heading {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+}
+
+.btn {
+    text-decoration: none;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.6rem 1rem;
+    transition: 0.25s;
+    color: #000;
+}
+
+.btn-grey {
+    background-color: var(--clr-grey);
+    border: 2px solid var(--clr-grey);
+}
+.btn-orange {
+    background-color: var(--clr-orange);
+    border: 2px solid var(--clr-orange);
+}
+.btn-green {
+    background-color: var(--clr-green);
+    border: 2px solid var(--clr-green);
+}
+
+.btn-grey:is(:hover, :focus, :focus-within) {
+    background-color: #000;
+    color: var(--clr-grey);
+}
+.btn-orange:is(:hover, :focus, :focus-within) {
+    background-color: #000;
+    color: var(--clr-orange);
+}
+.btn-green:is(:hover, :focus, :focus-within) {
+    background-color: #000;
+    color: var(--clr-green);
+}
+
+.scroller {
+    --size: 10rem;
+    overflow-y: scroll;
+    margin: auto 0;
+    height: calc(100% - 10rem);
+    margin-top: calc(var(--size) / 2);
+}
+
+.scroller::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scroller {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
