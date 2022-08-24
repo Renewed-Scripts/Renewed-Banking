@@ -1,12 +1,17 @@
 <script lang="ts">
-    import { activeAccount } from "../../store/stores";
+    import { accounts, activeAccount, popupDetails } from "../../store/stores";
     export let account:any;
 
     function handleAccountClick(id: any) {
-        console.log(`activeAccount.set=${id}`)
         activeAccount.update(() => id);
     };
-    
+
+    function handleButton(id:string, type:string) {
+        console.log(`id=${id} type=${type}`)
+        let account = $accounts.find((accountItem: any) => id === accountItem.id);
+        popupDetails.update(() => ({ actionType: type, account }));
+    }
+
 </script>
 
 <section class="account" on:click={()=>handleAccountClick(account.id)}>
@@ -24,9 +29,9 @@
     </div>
 
     <div class="btns-group">
-        <button class="btn btn-green" on:click={()=>console.log("iswehere?")}>Deposit</button>
-        <button class="btn btn-orange">Withdraw</button>
-        <button class="btn btn-grey">Transfer</button>
+        <button class="btn btn-green" on:click={() => handleButton(account.id, "deposit")}>Deposit</button>
+        <button class="btn btn-orange" on:click={() => handleButton(account.id, "withdraw")}>Withdraw</button>
+        <button class="btn btn-grey" on:click={() => handleButton(account.id, "transfer")}>Transfer</button>
     </div>
 </section>
 

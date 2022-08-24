@@ -1,8 +1,12 @@
 import { writable } from "svelte/store";
 
 export const visibility = writable(false);
-
 export let activeAccount = writable(null);
+
+export let popupDetails = writable({
+    account: {},
+    actionType: "",
+});
 
 export const accounts = writable<any>([
     {

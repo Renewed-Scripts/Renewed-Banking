@@ -25,3 +25,18 @@ RegisterNUICallback("closeInterface", function(_, cb)
     SetNuiFocus(false, false)
     cb("ok")
 end)
+
+RegisterNUICallback('deposit', function(data, cb)
+    print(json.encode(data))
+    cb("ok")
+end)
+
+RegisterNUICallback('withdraw', function(data, cb)
+    print(json.encode(data))
+    cb("ok")
+end)
+
+RegisterNUICallback('transfer', function(data, cb)
+    print(json.encode(data))
+    cb("ok")
+end)
