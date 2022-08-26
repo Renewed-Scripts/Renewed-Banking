@@ -1,35 +1,4 @@
 config = {
-    whitelistedJobs = {
-        ['police'] = {
-            label = "Police Department"
-        },
-        ['ambulance'] = {
-            label = "Medical Services"
-        },
-        ['mechanic'] =  {
-            label = "Vehicle Mechanic"
-        },
-        ['realestate'] =  {
-            label = "Real Estate"
-        },
-        ['cardealer'] =  {
-            label = "Vehicle Sales"
-        },
-        ['doj'] =  {
-            label = "Department Of Justice"
-        },
-    },
-    whitelistedGangs = {
-        ['ballas'] =  {
-            label = "Ballas"
-        },
-        ['vagos'] =  {
-            label = "Vagos"
-        },
-        ['triads'] =  {
-            label = "Triads"
-        },
-    },
     peds = {
         vector4(313.76, -280.42, 54.16, 345.95),
         vector4(149.43, -1042.07, 29.37, 348.67),

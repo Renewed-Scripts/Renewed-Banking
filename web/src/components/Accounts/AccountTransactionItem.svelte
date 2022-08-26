@@ -1,12 +1,11 @@
 <script lang="ts">
     export let transaction: any;
-    export let account: any;
 </script>
 
 <section class="transaction">
     <h5>
         <span>
-            {account.type} Account / {account.id}
+            {transaction.title}
             [{transaction.trans_type.toUpperCase()}]
         </span>
         <span>{transaction.trans_id}</span>
@@ -18,10 +17,10 @@
             {:else}
                 &nbsp;
             {/if}
-            $100
+            ${transaction.amount}
         </span>
         <span> {transaction.receiver} </span>
-        <span>{transaction.time} <br /> {transaction.unknown}</span>
+        <span>{transaction.time} <br /> {transaction.issuer}</span>
     </h4>
 
     <h6>

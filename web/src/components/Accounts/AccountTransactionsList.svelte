@@ -18,7 +18,7 @@
     <section class="scroller">
         {#if account}
             {#each account.transactions as transaction (transaction.trans_id)}
-                <AccountTransactionItem {transaction} {account} />
+                <AccountTransactionItem {transaction}/>
             {/each}
         {:else}
             Select any Account

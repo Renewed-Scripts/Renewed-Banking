@@ -7,7 +7,6 @@
     };
 
     function handleButton(id:string, type:string) {
-        console.log(`id=${id} type=${type}`)
         let account = $accounts.find((accountItem: any) => id === accountItem.id);
         popupDetails.update(() => ({ actionType: type, account }));
     }
@@ -29,9 +28,13 @@
     </div>
 
     <div class="btns-group">
-        <button class="btn btn-green" on:click={() => handleButton(account.id, "deposit")}>Deposit</button>
-        <button class="btn btn-orange" on:click={() => handleButton(account.id, "withdraw")}>Withdraw</button>
-        <button class="btn btn-grey" on:click={() => handleButton(account.id, "transfer")}>Transfer</button>
+        {#if !account.isFrozen}
+            <button class="btn btn-green" on:click={() => handleButton(account.id, "deposit")}>Deposit</button>
+            <button class="btn btn-orange" on:click={() => handleButton(account.id, "withdraw")}>Withdraw</button>
+            <button class="btn btn-grey" on:click={() => handleButton(account.id, "transfer")}>Transfer</button>
+        {:else}
+            Account Status: Frozen
+        {/if}
     </div>
 </section>
 

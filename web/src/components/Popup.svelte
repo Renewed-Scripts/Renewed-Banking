@@ -1,6 +1,6 @@
 <script>
-    import { accounts, activeAccount, popupDetails } from "../../store/stores";
-    import {fetchNui} from "../../utils/fetchNui"
+    import { accounts, activeAccount, popupDetails, loading } from "../store/stores";
+    import {fetchNui} from "../utils/fetchNui"
     let amount = 0;
     let comment = "";
     let stateid = "";
@@ -12,9 +12,15 @@
             actionType: "",
         }));
     }
+
     function submitInput() {
-        fetchNui($popupDetails.actionType, {amount: amount, comment: comment, stateid: stateid})
-        console.log(`amount=${amount} aomment=${comment} stateid=${stateid}`)
+        loading.set(true)
+        fetchNui($popupDetails.actionType, {fromAccount: $popupDetails.account.id, amount: amount, comment: comment, stateid: stateid}).then(retData => {
+            setTimeout(() => {
+                accounts.set(retData)
+                loading.set(false)
+            }, 3500);
+        })
         closePopup()
     }
 </script>
@@ -35,7 +41,7 @@
 
             {#if $popupDetails.actionType === "transfer"}
                 <div class="form-row">
-                    <label for="stateId">State ID or Citizen ID</label>
+                    <label for="stateId">Business or Citizen ID</label>
                     <input bind:value={stateid} type="text" name="stateId" id="stateId" placeholder="#" />
                 </div>
             {/if}

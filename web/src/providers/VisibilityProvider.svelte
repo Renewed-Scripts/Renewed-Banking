@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fetchNui } from '../utils/fetchNui';
   import { onMount } from 'svelte';
-  import { visibility, accounts, activeAccount } from '../store/stores';
+  import { visibility, accounts, activeAccount, loading } from '../store/stores';
   import { useNuiEvent } from '../utils/useNuiEvent';
   let isVisible: boolean;
 
@@ -13,11 +13,15 @@
     accounts.set(data.accounts);
     activeAccount.update(() => data.accounts[0].id)
     visibility.set(data.status);
+    loading.set(data.loading)
+  })
+
+  useNuiEvent<any>('setLoading', data => {
+    loading.set(data.status);
   })
 
   onMount(() => {
     const keyHandler = (e: KeyboardEvent) => {
-      console.log(`Key Presed ${e.code}`)
       if (isVisible && ['Escape'].includes(e.code)) {
         fetchNui('closeInterface');
         visibility.set(false);
