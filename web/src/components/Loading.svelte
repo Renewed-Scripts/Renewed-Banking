@@ -39,7 +39,7 @@
         border-radius: 1rem;
 
     }
-    
+
     .loading-spinner {
         color: official;
         display: inline-block;

@@ -1,5 +1,5 @@
 ALTER TABLE management_funds
-  ADD transactions longtext DEFAULT '[]', 
+  ADD transactions longtext DEFAULT '[]',
   ADD isFrozen int(11) DEFAULT 0;
 
 CREATE TABLE IF NOT EXISTS `player_transactions` (

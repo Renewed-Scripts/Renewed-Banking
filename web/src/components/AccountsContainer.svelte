@@ -9,7 +9,6 @@
         <AccountsList />
         <AccountTransactionsList />
     </section>
-    
     <h5>Cash: ${$accounts[0].cash}</h5>
 </div>
 

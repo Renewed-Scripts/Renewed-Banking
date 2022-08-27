@@ -22,7 +22,7 @@ function getTimeElapsed(time)
     local retData = ""
     local minutes = math.floor(math.fmod(time,3600)/60)
     local hours = math.floor(time/3600)
-    if hours ~= 0 and hours > 1 then 
+    if hours ~= 0 and hours > 1 then
         retData = hours .. " hours ago"
     elseif hours ~= 0 and hours == 1 then
         retData = "A hour ago"
@@ -70,7 +70,7 @@ end)
 
 local function updatePlayerAccount(cid)
     MySQL.query('SELECT * FROM player_transactions WHERE id = @id ', {['@id'] = cid}, function(account)
-        if #account < 1 then 
+        if #account < 1 then
             cachedPlayers[cid] = {
                 isFrozen = 0,
                 transactions = {}
@@ -87,7 +87,7 @@ local function updatePlayerAccount(cid)
 end
 
 RegisterNetEvent('QBCore:Server:OnPlayerLoaded', function()
-	local Player = QBCore.Functions.GetPlayer(source)
+    local Player = QBCore.Functions.GetPlayer(source)
     local cid = Player.PlayerData.citizenid
     updatePlayerAccount(cid)
 end)
