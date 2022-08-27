@@ -21,7 +21,7 @@ export async function fetchNui<T = any>(
     ? (window as any).GetParentResourceName()
     : "nui-frame-app";
 
-  const resp = await fetch(`https://${resourceName}/${eventName}`, options);
+  const resp = await fetch(`https://Renewed-Banking/${eventName}`, options);
 
   return await resp.json();
 }
