@@ -69,7 +69,7 @@ QBCore.Functions.CreateCallback("renewed-banking:server:initalizeBanking", funct
 end)
 
 local function updatePlayerAccount(cid)
-    MySQL.query('SELECT * FROM bank_test WHERE id = @id ', {['@id'] = cid}, function(account)
+    MySQL.query('SELECT * FROM player_transactions WHERE id = @id ', {['@id'] = cid}, function(account)
         if #account < 1 then 
             cachedPlayers[cid] = {
                 isFrozen = 0,
@@ -132,7 +132,7 @@ local function handleTransaction(account, title, amount, message, issuer, receiv
         })
     elseif cachedPlayers[account] then
         table.insert(cachedPlayers[account].transactions, 1, transaction)
-        MySQL.query("INSERT INTO bank_test (id, transactions) VALUES (:id, :transactions) ON DUPLICATE KEY UPDATE transactions = :transactions",{
+        MySQL.query("INSERT INTO player_transactions (id, transactions) VALUES (:id, :transactions) ON DUPLICATE KEY UPDATE transactions = :transactions",{
             ['id'] = account,
             ['transactions'] = json.encode(cachedPlayers[account].transactions)
         })
