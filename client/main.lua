@@ -3,6 +3,10 @@ local isVisible = false
 
 local FullyLoaded = LocalPlayer.state.isLoggedIn
 
+AddStateBagChangeHandler('isLoggedIn', nil, function(_, _, value)
+    FullyLoaded = value
+end)
+
 local function openBankUI()
     SendNUIMessage({action = "setLoading", status = true})
     QBCore.Functions.TriggerCallback('renewed-banking:server:initalizeBanking', function(result)
@@ -36,6 +40,7 @@ RegisterNetEvent("Renewed-Banking:client:openBankUI", function(data)
         Wait(500)
         ClearPedTasksImmediately(PlayerPedId())
     end, function()
+        ClearPedTasksImmediately(PlayerPedId())
         QBCore.Functions.Notify('Cancelled...', 'error', 7500)
     end)
 end)
@@ -49,6 +54,7 @@ RegisterNUICallback("closeInterface", function(_, cb)
     closeBankUI()
     cb("ok")
 end)
+
 RegisterCommand("closeBankUI", function() closeBankUI() end)
 
 local targetOptions = {{
@@ -75,7 +81,7 @@ CreateThread(function ()
     exports['qb-target']:AddTargetModel(config.atms,{
         options = targetOptions,
         distance = 1.5
-     })
+    })
 end)
 
 local pedSpawned = false
@@ -113,23 +119,12 @@ local function deletePeds()
 end
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
-    FullyLoaded = true
     createPeds()
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
-    FullyLoaded = false
     deletePeds()
 end)
-
-
-
-
-
-
-
-
----- Just Eventhandlers that deletes and creates ped on resource restart ----
 
 AddEventHandler('onResourceStop', function(resource)
     if resource == GetCurrentResourceName() then
@@ -144,4 +139,13 @@ AddEventHandler('onResourceStart', function(resource)
         createPeds()
       end
    end
+end)
+
+
+RegisterNetEvent("Renewed-Banking:client:sendNotification", function(msg)
+    if not msg then return end
+    SendNUIMessage({
+        action = "notify",
+        status = msg,
+    })
 end)
