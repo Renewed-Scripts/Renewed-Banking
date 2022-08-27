@@ -1,7 +1,7 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-local playerJob = nil
-local bankingData = nil
 local isVisible = false
+
+local FullyLoaded = LocalPlayer.state.isLoggedIn
 
 local function openBankUI()
     SendNUIMessage({action = "setLoading", status = true})
@@ -19,7 +19,26 @@ local function openBankUI()
         end)
     end)
 end
-RegisterNetEvent("Renewed-Banking:client:openBankUI", openBankUI)
+
+RegisterNetEvent("Renewed-Banking:client:openBankUI", function(data)
+    if not data.entity then return end
+    local isPed = IsEntityAPed(data.entity)
+    local txt = isPed and 'Opening Bank' or 'Opening ATM'
+
+    TaskStartScenarioInPlace(PlayerPedId(), "PROP_HUMAN_ATM", 0, 1)
+    QBCore.Functions.Progressbar('Renewed-Banking', txt, math.random(3000,5000), false, true, {
+        disableMovement = true,
+        disableCarMovement = true,
+        disableMouse = false,
+        disableCombat = true,
+    }, {}, {}, {}, function()
+        openBankUI()
+        Wait(500)
+        ClearPedTasksImmediately(PlayerPedId())
+    end, function()
+        QBCore.Functions.Notify('Cancelled...', 'error', 7500)
+    end)
+end)
 
 local function closeBankUI()
     isVisible = false
@@ -37,6 +56,7 @@ local targetOptions = {{
     event = "Renewed-Banking:client:openBankUI",
     icon = "fas fa-money-check",
     label = "View Bank Account",
+    entity = entity
 }}
 
 local bankActions = {"deposit", "withdraw", "transfer"}
@@ -52,12 +72,7 @@ CreateThread(function ()
         end)
     end
 
-    exports['qb-target']:AddTargetModel({
-        `prop_atm_01`,
-        `prop_atm_02`,
-        `prop_atm_03`,
-        `prop_fleeca_atm`
-    },{
+    exports['qb-target']:AddTargetModel(config.atms,{
         options = targetOptions,
         distance = 1.5
      })
@@ -98,9 +113,35 @@ local function deletePeds()
 end
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
+    FullyLoaded = true
     createPeds()
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
+    FullyLoaded = false
     deletePeds()
+end)
+
+
+
+
+
+
+
+
+---- Just Eventhandlers that deletes and creates ped on resource restart ----
+
+AddEventHandler('onResourceStop', function(resource)
+    if resource == GetCurrentResourceName() then
+        deletePeds()
+    end
+end)
+
+AddEventHandler('onResourceStart', function(resource)
+   if resource == GetCurrentResourceName() then
+      Wait(100)
+      if FullyLoaded then
+        createPeds()
+      end
+   end
 end)

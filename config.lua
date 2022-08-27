@@ -1,4 +1,13 @@
 config = {
+
+    atms = {
+        `prop_atm_01`,
+        `prop_atm_02`,
+        `prop_atm_03`,
+        `prop_fleeca_atm`
+    },
+
+
     peds = {
         [1] = {
             model = 'u_m_m_bankman',
