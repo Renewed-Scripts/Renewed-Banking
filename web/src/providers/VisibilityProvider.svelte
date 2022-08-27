@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fetchNui } from '../utils/fetchNui';
   import { onMount } from 'svelte';
-  import { visibility, accounts, activeAccount, loading } from '../store/stores';
+  import { visibility, accounts, activeAccount, loading, notify } from '../store/stores';
   import { useNuiEvent } from '../utils/useNuiEvent';
   let isVisible: boolean;
 
@@ -18,6 +18,13 @@
 
   useNuiEvent<any>('setLoading', data => {
     loading.set(data.status);
+  })
+
+  useNuiEvent<any>('notify', data => {
+    notify.set(data.status);
+    setTimeout(() => {
+      notify.set("");
+    }, 3500);
   })
 
   onMount(() => {
