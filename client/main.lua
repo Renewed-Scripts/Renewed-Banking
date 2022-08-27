@@ -7,12 +7,20 @@ AddStateBagChangeHandler('isLoggedIn', nil, function(_, _, value)
     FullyLoaded = value
 end)
 
+local function nuiHandler(val)
+    isVisible = val
+    SetNuiFocus(val, val)
+end
+
 local function openBankUI()
     SendNUIMessage({action = "setLoading", status = true})
-    isVisible = true
-    SetNuiFocus(isVisible, isVisible)
+    nuiHandler(true)
     QBCore.Functions.TriggerCallback('renewed-banking:server:initalizeBanking', function(result)
-        if not result then QBCore.Functions.Notify('Failed to load Banking Data!', 'error', 7500) end
+        if not result then
+            nuiHandler(false)
+            QBCore.Functions.Notify('Failed to load Banking Data!', 'error', 7500)
+            return
+        end
         SetTimeout(1000, function()
             SendNUIMessage({
                 action = "setVisible",
@@ -45,17 +53,12 @@ RegisterNetEvent("Renewed-Banking:client:openBankUI", function(data)
     end)
 end)
 
-local function closeBankUI()
-    isVisible = false
-    SetNuiFocus(false, false)
-end
-
 RegisterNUICallback("closeInterface", function(_, cb)
-    closeBankUI()
+    nuiHandler(false)
     cb("ok")
 end)
 
-RegisterCommand("closeBankUI", function() closeBankUI() end)
+RegisterCommand("closeBankUI", function() nuiHandler(false) end)
 
 local targetOptions = {{
     type = "client",
@@ -126,12 +129,6 @@ RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
     deletePeds()
 end)
 
-AddEventHandler('onResourceStop', function(resource)
-    if resource == GetCurrentResourceName() then
-        deletePeds()
-    end
-end)
-
 AddEventHandler('onResourceStart', function(resource)
    if resource == GetCurrentResourceName() then
       Wait(100)
@@ -140,7 +137,6 @@ AddEventHandler('onResourceStart', function(resource)
       end
    end
 end)
-
 
 RegisterNetEvent("Renewed-Banking:client:sendNotification", function(msg)
     if not msg then return end

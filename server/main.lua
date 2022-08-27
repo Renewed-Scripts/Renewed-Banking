@@ -231,7 +231,7 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:transfer", function(sour
                 local name = ("%s %s"):format(Player2.PlayerData.charinfo.firstname, Player2.PlayerData.charinfo.lastname)
                 local transaction = handleTransaction(data.fromAccount, ("%s / %s"):format(cachedAccounts[data.fromAccount].name, data.fromAccount), amount, data.comment, cachedAccounts[data.fromAccount].name, name, "withdraw")
                 handleTransaction(data.stateid, ("%s / %s"):format(cachedAccounts[data.fromAccount].name, data.fromAccount), amount, data.comment, cachedAccounts[data.fromAccount].name, name, "deposit", transaction.trans_id)
-            else    
+            else
                 TriggerClientEvent('Renewed-Banking:client:sendNotification', source, "Account does not have enough money!")
                 cb(false)
                 return
