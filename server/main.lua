@@ -95,7 +95,7 @@ end)
 -- Events
 AddEventHandler('onResourceStart', function(resourceName)
     if resourceName == GetCurrentResourceName() then
-        for k, v in pairs(QBCore.Functions.GetPlayers()) do
+        for _, v in pairs(QBCore.Functions.GetPlayers()) do
             local Player = QBCore.Functions.GetPlayer(v)
             if Player then
                 local cid = Player.PlayerData.citizenid
@@ -140,7 +140,7 @@ local function handleTransaction(account, title, amount, message, issuer, receiv
         print("^6[^4Renewed-Banking^6] ^0 Account not found account_id="..account)
     end
     return transaction
-end
+end exports("handleTransaction", handleTransaction)
 
 QBCore.Functions.CreateCallback("Renewed-Banking:server:deposit", function(source, cb, data)
     local Player = QBCore.Functions.GetPlayer(source)
