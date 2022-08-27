@@ -17,7 +17,9 @@
         loading.set(true)
         fetchNui($popupDetails.actionType, {fromAccount: $popupDetails.account.id, amount: amount, comment: comment, stateid: stateid}).then(retData => {
             setTimeout(() => {
-                accounts.set(retData)
+                if (retData !== false){
+                    accounts.set(retData)
+                }
                 loading.set(false)
             }, 1000);
         })
