@@ -19,7 +19,7 @@
             setTimeout(() => {
                 accounts.set(retData)
                 loading.set(false)
-            }, 3500);
+            }, 1000);
         })
         closePopup()
     }
