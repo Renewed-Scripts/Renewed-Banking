@@ -158,6 +158,9 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:deposit", function(sourc
         handleTransaction(data.fromAccount,"Personal Account / " .. data.fromAccount, amount, data.comment, name, name, "deposit")
         local bankData = getBankData(source)
         cb(bankData)
+    else
+        TriggerClientEvent('Renewed-Banking:client:sendNotification', source, "Account does not have enough money!")
+        cb(false)
     end
 end)
 
@@ -180,6 +183,9 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:withdraw", function(sour
         handleTransaction(data.fromAccount,"Personal Account / " .. data.fromAccount, amount, data.comment, name, name, "withdraw")
         local bankData = getBankData(source)
         cb(bankData)
+    else
+        TriggerClientEvent('Renewed-Banking:client:sendNotification', source, "Account does not have enough money!")
+        cb(false)
     end
 end)
 
@@ -187,7 +193,7 @@ local function getPlayerData(source, id)
     local Player = QBCore.Functions.GetPlayer(id)
     if not Player then Player = QBCore.Functions.GetPlayerByCitizenId(id) end
     if not Player then
-        local msg = ("Cannot Find Account(%s) To Transfer To"):format(data.stateid)
+        local msg = ("Cannot Find Account(%s) To Transfer To"):format(id)
         print("^6[^4Renewed-Banking^6] ^0 "..msg)
         QBCore.Functions.Notify(source, msg, 'error', 5000)
     end
@@ -207,16 +213,28 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:transfer", function(sour
                 exports['qb-management']:AddMoney(data.stateid, amount)
                 local transaction = handleTransaction(data.fromAccount, ("%s / %s"):format(cachedAccounts[data.fromAccount].name, data.fromAccount), amount, data.comment, cachedAccounts[data.fromAccount].name, cachedAccounts[data.stateid].name, "withdraw")
                 handleTransaction(data.stateid, ("%s / %s"):format(cachedAccounts[data.fromAccount].name, data.fromAccount), amount, data.comment, cachedAccounts[data.fromAccount].name, cachedAccounts[data.stateid].name, "deposit", transaction.trans_id)
+            else
+                TriggerClientEvent('Renewed-Banking:client:sendNotification', source, "Account does not have enough money!")
+                cb(false)
+                return
             end
         else
             local Player2 = getPlayerData(source, data.stateid)
-            if not Player2 then return end
+            if not Player2 then
+                TriggerClientEvent('Renewed-Banking:client:sendNotification', source, "Failed to transfer to account!")
+                cb(false)
+                return
+            end
             local canTransfer = exports['qb-management']:RemoveMoney(data.fromAccount, amount)
             if canTransfer then
                 Player2.Functions.AddMoney('bank', amount, data.comment)
                 local name = ("%s %s"):format(Player2.PlayerData.charinfo.firstname, Player2.PlayerData.charinfo.lastname)
                 local transaction = handleTransaction(data.fromAccount, ("%s / %s"):format(cachedAccounts[data.fromAccount].name, data.fromAccount), amount, data.comment, cachedAccounts[data.fromAccount].name, name, "withdraw")
                 handleTransaction(data.stateid, ("%s / %s"):format(cachedAccounts[data.fromAccount].name, data.fromAccount), amount, data.comment, cachedAccounts[data.fromAccount].name, name, "deposit", transaction.trans_id)
+            else    
+                TriggerClientEvent('Renewed-Banking:client:sendNotification', source, "Account does not have enough money!")
+                cb(false)
+                return
             end
         end
     else
@@ -226,16 +244,28 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:transfer", function(sour
                 local name = ("%s %s"):format(Player.PlayerData.charinfo.firstname, Player.PlayerData.charinfo.lastname)
                 local transaction = handleTransaction(data.fromAccount, ("Personal Account / %s"):format(data.fromAccount), amount, data.comment, name, cachedAccounts[data.stateid].name, "withdraw")
                 handleTransaction(data.stateid, ("Personal Account / %s"):format(data.fromAccount), amount, data.comment, name, cachedAccounts[data.stateid].name, "deposit", transaction.trans_id)
+            else
+                TriggerClientEvent('Renewed-Banking:client:sendNotification', source, "Account does not have enough money!")
+                cb(false)
+                return
             end
         else
             local Player2 = getPlayerData(source, data.stateid)
-            if not Player2 then return end
+            if not Player2 then
+                TriggerClientEvent('Renewed-Banking:client:sendNotification', source, "Failed to transfer to unknown account!")
+                cb(false)
+                return
+            end
             if Player.Functions.RemoveMoney('bank', amount, data.comment) then
                 Player2.Functions.AddMoney('bank', amount, data.comment)
                 local name = ("%s %s"):format(Player.PlayerData.charinfo.firstname, Player.PlayerData.charinfo.lastname)
                 local name2 = ("%s %s"):format(Player2.PlayerData.charinfo.firstname, Player2.PlayerData.charinfo.lastname)
                 local transaction = handleTransaction(data.fromAccount, ("Personal Account / %s"):format(data.fromAccount), amount, data.comment, name, name2, "withdraw")
                 handleTransaction(data.stateid, ("Personal Account / %s"):format(data.fromAccount), amount, data.comment, name, name2, "deposit", transaction.trans_id)
+            else
+                TriggerClientEvent('Renewed-Banking:client:sendNotification', source, "Account does not have enough money!")
+                cb(false)
+                return
             end
         end
     end

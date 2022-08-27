@@ -9,17 +9,17 @@ end)
 
 local function openBankUI()
     SendNUIMessage({action = "setLoading", status = true})
+    isVisible = true
+    SetNuiFocus(isVisible, isVisible)
     QBCore.Functions.TriggerCallback('renewed-banking:server:initalizeBanking', function(result)
         if not result then QBCore.Functions.Notify('Failed to load Banking Data!', 'error', 7500) end
         SetTimeout(1000, function()
-            isVisible = true
             SendNUIMessage({
                 action = "setVisible",
                 status = isVisible,
                 accounts = result,
                 loading = false
             })
-            SetNuiFocus(isVisible, isVisible)
         end)
     end)
 end
