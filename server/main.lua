@@ -18,11 +18,22 @@ CreateThread(function()
     end)
 end)
 
-function getTimeElapsed(time)
+function getTimeElapsed(seconds)
     local retData = ""
-    local minutes = math.floor(math.fmod(time,3600)/60)
-    local hours = math.floor(time/3600)
-    if hours ~= 0 and hours > 1 then
+    local minutes = math.floor(seconds / 60)
+    local hours = math.floor(minutes / 60)
+    local days = math.floor(hours / 24)
+    local weeks = math.floor(days / 7)
+
+    if weeks ~= 0 and weeks > 1 then
+        retData = weeks .. " weeks ago"
+    elseif weeks ~= 0 and weeks == 1 then
+        retData = "A day ago"
+    elseif days ~= 0 and days > 1 then
+        retData = days .. " days ago"
+    elseif days ~= 0 and days == 1 then
+        retData = "A day ago"
+    elseif hours ~= 0 and hours > 1 then
         retData = hours .. " hours ago"
     elseif hours ~= 0 and hours == 1 then
         retData = "A hour ago"
@@ -33,12 +44,14 @@ function getTimeElapsed(time)
     else
         retData = "A few seconds ago"
     end
+
     return retData
 end
 
 local function getBankData(source)
     local Player = QBCore.Functions.GetPlayer(source)
     local bankData = {}
+    local time = os.time()
 
     bankData[#bankData+1] = {
         id = Player.PlayerData.citizenid,
@@ -49,15 +62,16 @@ local function getBankData(source)
         cash = Player.PlayerData.money.cash,
         transactions = json.decode(json.encode(cachedPlayers[Player.PlayerData.citizenid].transactions)),
     }
+
     for k=1, #bankData[1].transactions do
-        bankData[1].transactions[k].time = getTimeElapsed(os.time()-bankData[1].transactions[k].time)
+        bankData[1].transactions[k].time = getTimeElapsed(time-bankData[1].transactions[k].time)
     end
 
     local org = json.decode(json.encode(cachedAccounts[Player.PlayerData.job.name]))
     if org and QBCore.Shared.Jobs[Player.PlayerData.job.name].grades[tostring(Player.PlayerData.job.grade.level)].bankAuth then
         for k=1, #org.transactions do
             org.amount = exports['qb-management']:GetAccount(Player.PlayerData.job.name)
-            org.transactions[k].time = getTimeElapsed(os.time()-org.transactions[k].time)
+            org.transactions[k].time = getTimeElapsed(time-org.transactions[k].time)
         end
         bankData[#bankData+1] = org
     end
