@@ -6,7 +6,6 @@ NoPixel Inspired Banking System Recreated In Svelte.
 # Dependencies
 * [oxmysql](https://github.com/overextended/oxmysql)
 * [qb-core](https://github.com/qbcore-framework)
-* [qb-management](https://github.com/qbcore-framework/qb-management)
 * [qb-target](https://github.com/qbcore-framework/qb-target)
 
 # Installation
@@ -19,7 +18,6 @@ NoPixel Inspired Banking System Recreated In Svelte.
 
 ```lua
 exports['Renewed-Banking']:handleTransaction(account, title, amount, message, issuer, receiver, type, transID)
-
  ---@param account<string> - job name or citizenid
  ---@param title<string> - Title of transaction example `Personal Account / ${Player.PlayerData.citizenid}`
  ---@param amount<number> - Amount of money being transacted
@@ -37,5 +35,23 @@ exports['Renewed-Banking']:handleTransaction(account, title, amount, message, is
   ---@param message<string> - Description of transaction
   ---@param issuer<string> - Name of Business or Character issuing the bill
   ---@param time<number> - Epoch timestamp of transaction
-}
+---}
+
+
+exports['Renewed-Banking']:getAccountMoney(account)
+ ---@param account<string> - Job Name | Custom Account Name
+
+---@return amount<number> - Amount of money account has or false
+
+exports['Renewed-Banking']:addAccountMoney(account, amount)
+ ---@param account<string> - Job Name | Custom Account Name
+  ---@param amount<number> - Amount of money being transacted
+
+---@return complete<boolean> - true | false
+
+exports['Renewed-Banking']:removeAccountMoney(account, amount)
+ ---@param account<string> - Job Name | Custom Account Name
+  ---@param amount<number> - Amount of money being transacted
+
+---@return complete<boolean> - true | false
 ```

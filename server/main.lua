@@ -191,7 +191,7 @@ local function addAccountMoney(account, amount)
         return false
     end
     cachedAccounts[account].amount += amount
-    return cachedAccounts[account].amount
+    return true
 end exports('addAccountMoney', addAccountMoney)
 
 QBCore.Functions.CreateCallback("Renewed-Banking:server:deposit", function(source, cb, data)
