@@ -105,8 +105,17 @@ local function createPeds()
         SetEntityInvincible(bankPeds[k], true)
         SetBlockingOfNonTemporaryEvents(bankPeds[k], true)
 
+        local newTarget = json.decode(json.encode(targetOptions))
+        newTarget[#newTarget+1] = {
+            type = "client",
+            event = "Renewed-Banking:client:accountManagmentMenu",
+            icon = "fas fa-money-check",
+            label = "Manage Bank Account",
+            entity = entity
+        }
+
         exports['qb-target']:AddTargetEntity(bankPeds[k], {
-            options = targetOptions,
+            options = newTarget,
             distance = 2.0
         })
     end
@@ -129,6 +138,12 @@ RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
     deletePeds()
 end)
 
+AddEventHandler('onResourceStop', function(resource)
+    if resource == GetCurrentResourceName() then
+        deletePeds()
+    end
+end)
+
 AddEventHandler('onResourceStart', function(resource)
    if resource == GetCurrentResourceName() then
       Wait(100)
@@ -144,4 +159,70 @@ RegisterNetEvent("Renewed-Banking:client:sendNotification", function(msg)
         action = "notify",
         status = msg,
     })
+end)
+
+RegisterNetEvent('Renewed-Banking:client:accountManagmentMenu', function(data)
+    local table = {
+        {
+            isMenuHeader = true,
+            header = "Los Santos Banking"
+        },
+        {
+            header = "Create New Account",
+            txt = "Create a new sub bank account!",
+            params = {
+                event = 'Renewed-Banking:client:createAccountMenu'
+            }
+        },
+        {
+            header = "Manage Existing Accounts",
+            txt = "View existing accounts!",
+            params = {
+                event = 'Renewed-Banking:client:viewAccountsMenu'
+            }
+        }
+    }
+    exports['qb-menu']:openMenu(table)
+end)
+
+RegisterNetEvent('Renewed-Banking:client:createAccountMenu', function(data)
+    local dialog = exports['qb-input']:ShowInput({
+        header = "Los Santos Banking",
+        submitText = "Create Account",
+        inputs = {
+            {
+                text = "Account ID (NO SPACES)",
+                name = "accountid",
+                type = "text",
+                isRequired = true
+            }
+        }
+    })
+    if dialog and dialog.accountid then
+        dialog.accountid = dialog.accountid:lower():gsub("%s+", "")
+        TriggerServerEvent("Renewed-Banking:server:createNewAccount", dialog.accountid)
+    end
+end)
+
+RegisterNetEvent('Renewed-Banking:client:viewAccountsMenu', function(data)
+    TriggerServerEvent("Renewed-Banking:server:getPlayerAccounts")
+end)
+
+RegisterNetEvent('Renewed-Banking:client:addAccountMember', function(data)
+    local dialog = exports['qb-input']:ShowInput({
+        header = "Los Santos Banking",
+        submitText = "Add Account Member",
+        inputs = {
+            {
+                text = "Citizen/State ID",
+                name = "accountid",
+                type = "text",
+                isRequired = true
+            }
+        }
+    })
+    if dialog and dialog.accountid then
+        dialog.accountid = dialog.accountid:upper():gsub("%s+", "")
+        TriggerServerEvent("Renewed-Banking:server:addAccountMember", data.account, dialog.accountid)
+    end
 end)

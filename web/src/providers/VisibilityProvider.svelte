@@ -1,7 +1,14 @@
 <script lang="ts">
   import { fetchNui } from '../utils/fetchNui';
   import { onMount } from 'svelte';
-  import { visibility, accounts, activeAccount, loading, notify } from '../store/stores';
+  import { 
+    visibility,
+    accounts,
+    activeAccount,
+    loading,
+    notify,
+    popupDetails
+  } from '../store/stores';
   import { useNuiEvent } from '../utils/useNuiEvent';
   let isVisible: boolean;
 
@@ -32,6 +39,10 @@
       if (isVisible && ['Escape'].includes(e.code)) {
         fetchNui('closeInterface');
         visibility.set(false);
+        popupDetails.update((val) => ({
+          ...val,
+          actionType: "",
+        }));
       }
     };
 

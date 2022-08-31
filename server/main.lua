@@ -1,6 +1,7 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 local cachedAccounts = {}
 local cachedPlayers = {}
+local cachedOffline = {}
 
 CreateThread(function()
     MySQL.query('SELECT * FROM bank_accounts_new', {}, function(accounts)
@@ -15,6 +16,7 @@ CreateThread(function()
                 amount = v.amount,
                 transactions = json.decode(v.transactions),
                 auth = {},
+                creator = v.creator
             }
             if #v.auth >= 1 then
                 for k=1, #v.auth do
@@ -25,7 +27,7 @@ CreateThread(function()
     end)
 end)
 
-function getTimeElapsed(seconds)
+local function getTimeElapsed(seconds)
     local retData = ""
     local minutes = math.floor(seconds / 60)
     local hours = math.floor(minutes / 60)
@@ -84,9 +86,9 @@ local function getBankData(source)
 
     local sharedAccounts = cachedPlayers[Player.PlayerData.citizenid].accounts
     for k=1, #sharedAccounts do
-        local sAccount = json.decode(json.encode(cachedAccounts[sharedAccounts]))
-        for k=1, #sAccount.transactions do
-            sAccount.transactions[k].time = getTimeElapsed(time-sAccount.transactions[k].time)
+        local sAccount = json.decode(json.encode(cachedAccounts[sharedAccounts[k]]))
+        for i=1, #sAccount.transactions do
+            sAccount.transactions[i].time = getTimeElapsed(time-sAccount.transactions[i].time)
         end
         bankData[#bankData+1] = sAccount
     end
@@ -101,22 +103,14 @@ end)
 
 local function updatePlayerAccount(cid)
     MySQL.query('SELECT * FROM player_transactions WHERE id = @id ', {['@id'] = cid}, function(account)
-        MySQL.query('SELECT * FROM bank_accounts_new WHERE auth LIKE ? ', {cid}, function(shared)
-            if #account < 1 then
-                cachedPlayers[cid] = {
-                    isFrozen = 0,
-                    transactions = {},
-                    accounts = {}
-                }
-                return
-            end
-            for k=1, #account do
-                cachedPlayers[cid] = {
-                    isFrozen = 0,
-                    transactions = json.decode(account[k].transactions),
-                    accounts = {}
-                }
-            end
+        local query = '%' .. cid .. '%'
+        MySQL.query("SELECT * FROM bank_accounts_new WHERE auth LIKE ? ", {query}, function(shared)
+            cachedPlayers[cid] = {
+                isFrozen = 0,
+                transactions = #account > 0 and json.decode(account[1].transactions) or {},
+                accounts = {}
+            }
+
             if #shared >= 1 then
                 for k=1, #shared do
                     cachedPlayers[cid].accounts[#cachedPlayers[cid].accounts+1] = shared[k].id
@@ -213,7 +207,7 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:deposit", function(sourc
             Player.Functions.AddMoney('bank', amount, data.comment)
         end
         local name = ("%s %s"):format(Player.PlayerData.charinfo.firstname, Player.PlayerData.charinfo.lastname)
-        handleTransaction(data.fromAccount,"Personal Account / " .. data.fromAccount, amount, data.comment, name, name, "deposit")
+        handleTransaction(data.fromAccount,"Personal Account / " .. data.fromAccount, amount, data.comment, name, data.fromAccount, "deposit")
         local bankData = getBankData(source)
         cb(bankData)
     else
@@ -252,7 +246,7 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:withdraw", function(sour
     if canWithdraw then
         Player.Functions.AddMoney('cash', amount, data.comment)
         local name = ("%s %s"):format(Player.PlayerData.charinfo.firstname, Player.PlayerData.charinfo.lastname)
-        handleTransaction(data.fromAccount,"Personal Account / " .. data.fromAccount, amount, data.comment, name, name, "withdraw")
+        handleTransaction(data.fromAccount,"Personal Account / " .. data.fromAccount, amount, data.comment, data.fromAccount, name, "withdraw")
         local bankData = getBankData(source)
         cb(bankData)
     else
@@ -264,6 +258,18 @@ end)
 local function getPlayerData(source, id)
     local Player = QBCore.Functions.GetPlayer(tonumber(id))
     if not Player then Player = QBCore.Functions.GetPlayerByCitizenId(id) end
+    if not Player then
+        Player = QBCore.Functions.GetOfflinePlayerByCitizenId(id)
+        if Player and not cachedPlayers[Player.PlayerData.citizenid] then
+            local offlineTrans = {}
+            local pushingP = promise.new()
+            MySQL.query('SELECT * FROM player_transactions WHERE id = @id ', {['@id'] = cid}, function(account)
+                pushingP:resolve(json.decode(account[1].transactions))
+            end)
+            offlineTrans = Citizen.Await(pushingP)
+            cachedPlayers[cid] = {transactions = offlineTrans}
+        end
+    end
     if not Player then
         local msg = ("Cannot Find Account(%s) To Transfer To"):format(id)
         print("^6[^4Renewed-Banking^6] ^0 "..msg)
@@ -328,6 +334,7 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:transfer", function(sour
                 cb(false)
                 return
             end
+
             if Player.Functions.RemoveMoney('bank', amount, data.comment) then
                 Player2.Functions.AddMoney('bank', amount, data.comment)
                 local name = ("%s %s"):format(Player.PlayerData.charinfo.firstname, Player.PlayerData.charinfo.lastname)
@@ -343,4 +350,181 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:transfer", function(sour
     end
     local bankData = getBankData(source)
     cb(bankData)
+end)
+
+RegisterNetEvent('Renewed-Banking:server:createNewAccount', function(accountid)
+    local Player = QBCore.Functions.GetPlayer(source)
+    if cachedAccounts[accountid] then QBCore.Functions.Notify(source, "Account ID is already in use", "error") return end
+    cachedAccounts[accountid] = {
+        id = accountid,
+        type = "Organization",
+        name = accountid,
+        frozen = 0,
+        amount = 0,
+        transactions = {},
+        auth = { [Player.PlayerData.citizenid] = true },
+        creator = Player.PlayerData.citizenid
+
+    }
+    cachedPlayers[Player.PlayerData.citizenid].accounts[#cachedPlayers[Player.PlayerData.citizenid].accounts+1] = accountid
+    MySQL.query("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (:id, :amount, :transactions, :auth, :isFrozen, :creator) ",{
+        ['id'] = accountid,
+        ['amount'] = cachedAccounts[accountid].amount,
+        ['transactions'] = json.encode(cachedAccounts[accountid].transactions),
+        ['auth'] = json.encode({Player.PlayerData.citizenid}),
+        ['isFrozen'] = cachedAccounts[accountid].frozen,
+        ['creator'] = Player.PlayerData.citizenid
+    })
+end)
+
+RegisterNetEvent("Renewed-Banking:server:getPlayerAccounts", function()
+    local Player = QBCore.Functions.GetPlayer(source)
+
+    local table = {{
+        isMenuHeader = true,
+        header = "Los Santos Banking"
+    }}
+    local accounts = cachedPlayers[Player.PlayerData.citizenid].accounts
+    if #accounts >= 1 then
+        for k=1, #accounts do
+            if cachedAccounts[accounts[k]].creator == Player.PlayerData.citizenid then
+                table[#table+1] = {
+                    header = accounts[k],
+                    txt = "View All Account Members!",
+                    params = {
+                        isServer =true,
+                        event = 'Renewed-Banking:server:viewAccountMenu',
+                        args = {
+                            account = accounts[k],
+                        }
+                    }
+                }
+            end
+        end
+    end
+    if #table == 1 then
+        table[#table+1] = {
+            header = "Account Not Found",
+            txt = "You need to be the creator",
+            isMenuHeader = true
+        }
+    end
+    TriggerClientEvent("qb-menu:client:openMenu", source, table)
+end)
+
+RegisterNetEvent("Renewed-Banking:server:viewAccountMenu", function(data)
+    local Player = QBCore.Functions.GetPlayer(source)
+
+    local table = {{
+        isMenuHeader = true,
+        header = "Los Santos Banking"
+    }}
+    local account = data.account
+    for k,_ in pairs(cachedAccounts[account].auth) do
+        local Player2 = getPlayerData(source, k)
+        local charInfo = Player2.PlayerData.charinfo
+        if Player.PlayerData.citizenid ~= Player2.PlayerData.citizenid then
+            table[#table+1] = {
+                header = ("%s %s"):format(charInfo.firstname, charInfo.lastname),
+                txt = "Remove Account Member!",
+                params = {
+                    isServer =true,
+                    event = 'Renewed-Banking:server:removeMemberConfirmation',
+                    args = {
+                        account = account,
+                        cid = k,
+                    }
+                }
+            }
+        end
+    end
+    table[#table+1] = {
+        header = "Add Citizen To Account",
+        txt = "Be careful who youu add(Requires Citizen ID)",
+        params = {
+            event = 'Renewed-Banking:client:addAccountMember',
+            args = {
+                account = account
+            }
+        }
+    }
+    TriggerClientEvent("qb-menu:client:openMenu", source, table)
+end)
+
+RegisterNetEvent('Renewed-Banking:server:addAccountMember', function(account, member)
+    local Player = QBCore.Functions.GetPlayer(source)
+
+    if Player.PlayerData.citizenid ~= cachedAccounts[account].creator then print(("^6[^4Renewed-Banking^6] ^0 %s has attempted to add someone to an account they didnt create."):format(GetPlayerName(source))) return end
+    local Player2 = getPlayerData(source, member)
+    if not Player2 then print(("^6[^4Renewed-Banking^6] ^0 Player with ID '%s' could not be found."):format(member)) return end
+
+    local targetCID = Player2.PlayerData.citizenid
+    if not Player2.Offline and cachedPlayers[targetCID] then
+        cachedPlayers[targetCID].accounts[#cachedPlayers[targetCID].accounts+1] = account
+    end
+
+    local auth = {}
+    for k,v in pairs(cachedAccounts[account].auth) do auth[#auth+1] = k end
+    auth[#auth+1] = targetCID
+    cachedAccounts[account].auth[targetCID] = true
+    MySQL.update('UPDATE bank_accounts_new SET auth = ? WHERE id = ?',{json.encode(auth), account})
+end)
+
+RegisterNetEvent('Renewed-Banking:server:removeMemberConfirmation', function(data)
+    local Player = QBCore.Functions.GetPlayer(source)
+    local table = {
+        {
+            isMenuHeader = true,
+            header = "Los Santos Banking"
+        },
+        {
+            header = 'Go Back',
+            icon = "fa-solid fa-angle-left",
+            params = {
+                isServer =true,
+                event = "Renewed-Banking:server:viewAccountMenu",
+                args = data
+            }
+        },
+        {
+            header = ("Are you sure you want to Citizen?"),
+            txt = ("CitizenID: %s; Their is no going back."):format(data.cid),
+            params = {
+                isServer =true,
+                event = 'Renewed-Banking:server:removeAccountMember',
+                args = data
+            }
+        }
+    }
+
+    TriggerClientEvent("qb-menu:client:openMenu", source, table)
+
+end)
+
+RegisterNetEvent('Renewed-Banking:server:removeAccountMember', function(data)
+    local Player = QBCore.Functions.GetPlayer(source)
+    if Player.PlayerData.citizenid ~= cachedAccounts[data.account].creator then print(("^6[^4Renewed-Banking^6] ^0 %s has attempted to add someone to an account they didnt create."):format(GetPlayerName(source))) return end
+    local Player2 = getPlayerData(source, data.cid)
+    if not Player2 then print(("^6[^4Renewed-Banking^6] ^0 Player with ID '%s' could not be found."):format(data.cid)) return end
+
+    local targetCID = Player2.PlayerData.citizenid
+    local tmp = {}
+    if not Player2.Offline and cachedPlayers[targetCID] then
+        for k in pairs(cachedAccounts[data.account].auth) do
+            if targetCID ~= k then
+                tmp[#tmp+1] = k
+            end
+        end
+        local newAccount = {}
+        if #cachedPlayers[targetCID].accounts >= 1 then
+            for k=1, #cachedPlayers[targetCID].accounts do
+                if cachedPlayers[targetCID].accounts[k] ~= data.account then
+                    newAccount[#newAccount+1] = cachedPlayers[targetCID].accounts[k]
+                end
+            end
+        end
+        cachedPlayers[targetCID].accounts = newAccount
+    end
+    cachedAccounts[data.account].auth[targetCID] = nil
+    MySQL.update('UPDATE bank_accounts_new SET auth = ? WHERE id = ?',{json.encode(tmp), data.account})
 end)
