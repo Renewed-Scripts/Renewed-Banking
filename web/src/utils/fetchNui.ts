@@ -18,6 +18,5 @@ export async function fetchNui<T = any>(
   };
 
   const resp = await fetch(`https://${identity}/${eventName}`, options);
-
   return await resp.json();
 }
