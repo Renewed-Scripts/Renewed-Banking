@@ -1,5 +1,6 @@
 <script lang="ts">
     export let transaction: any;
+    import { formatMoney } from "../../utils/misc";
 </script>
 
 <section class="transaction">
@@ -17,7 +18,7 @@
             {:else}
                 &nbsp;
             {/if}
-            ${transaction.amount}
+            {formatMoney(transaction.amount)}
         </span>
         <span> {transaction.receiver} </span>
         <span>{transaction.time} <br /> {transaction.issuer}</span>

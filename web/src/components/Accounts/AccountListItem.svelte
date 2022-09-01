@@ -1,5 +1,6 @@
 <script lang="ts">
     import { accounts, activeAccount, popupDetails } from "../../store/stores";
+    import { formatMoney } from "../../utils/misc";
     export let account:any;
 
     function handleAccountClick(id: any) {
@@ -23,7 +24,7 @@
     </h5>
 
     <div class="price">
-        <strong>${account.amount}</strong> <br />
+        <strong>{formatMoney(account.amount)}</strong> <br />
         <span>Available Balance</span>
     </div>
 

@@ -226,3 +226,22 @@ RegisterNetEvent('Renewed-Banking:client:addAccountMember', function(data)
         TriggerServerEvent("Renewed-Banking:server:addAccountMember", data.account, dialog.accountid)
     end
 end)
+
+RegisterNetEvent('Renewed-Banking:client:changeAccountName', function(data)
+    local dialog = exports['qb-input']:ShowInput({
+        header = "Los Santos Banking",
+        submitText = "Change Account Name",
+        inputs = {
+            {
+                text = "Account ID (NO SPACES)",
+                name = "accountid",
+                type = "text",
+                isRequired = true
+            }
+        }
+    })
+    if dialog and dialog.accountid then
+        dialog.accountid = dialog.accountid:lower():gsub("%s+", "")
+        TriggerServerEvent("Renewed-Banking:server:changeAccountName", data.account, dialog.accountid)
+    end
+end)

@@ -11,7 +11,7 @@ CreateThread(function()
             cachedAccounts[job] = { --  cachedAccounts[#cachedAccounts+1]
                 id = job,
                 type = "Organization",
-                name = QBCore.Shared.Jobs[job] and QBCore.Shared.Jobs[job].label or job,
+                name = QBCore.Shared.Jobs[job] and QBCore.Shared.Jobs[job].label or QBCore.Shared.Gangs[job] and QBCore.Shared.Gangs[job].label or job,
                 frozen = v.isFrozen == 1,
                 amount = v.amount,
                 transactions = json.decode(v.transactions),
@@ -75,13 +75,20 @@ local function getBankData(source)
         bankData[1].transactions[k].time = getTimeElapsed(time-bankData[1].transactions[k].time)
     end
 
-     -- Before
-    local org = json.decode(json.encode(cachedAccounts[Player.PlayerData.job.name]))
-    if org and QBCore.Shared.Jobs[Player.PlayerData.job.name].grades[tostring(Player.PlayerData.job.grade.level)].bankAuth then
-        for k=1, #org.transactions do
-            org.transactions[k].time = getTimeElapsed(time-org.transactions[k].time)
+    local job = json.decode(json.encode(cachedAccounts[Player.PlayerData.job.name]))
+    if job and QBCore.Shared.Jobs[Player.PlayerData.job.name].grades[tostring(Player.PlayerData.job.grade.level)].bankAuth then
+        for k=1, #job.transactions do
+            job.transactions[k].time = getTimeElapsed(time-job.transactions[k].time)
         end
-        bankData[#bankData+1] = org
+        bankData[#bankData+1] = job
+    end
+
+    local gang = json.decode(json.encode(cachedAccounts[Player.PlayerData.gang.name]))
+    if gang and QBCore.Shared.Gangs[Player.PlayerData.gang.name].grades[tostring(Player.PlayerData.gang.grade.level)].bankAuth then
+        for k=1, #gang.transactions do
+            gang.transactions[k].time = getTimeElapsed(time-gang.transactions[k].time)
+        end
+        bankData[#bankData+1] = gang
     end
 
     local sharedAccounts = cachedPlayers[Player.PlayerData.citizenid].accounts
@@ -415,6 +422,35 @@ end)
 RegisterNetEvent("Renewed-Banking:server:viewAccountMenu", function(data)
     local Player = QBCore.Functions.GetPlayer(source)
 
+    local table = {
+        {
+            isMenuHeader = true,
+            header = "Los Santos Banking"
+        },
+        {
+            header = "Manage Account Members",
+            txt = "View Existing & Add Members",
+            params = {
+                isServer =true,
+                event = 'Renewed-Banking:server:viewMemberManagement',
+                args = data
+            }
+        },
+        {
+            header = "Change Account Name",
+            txt = "Change account name (Transactions wont update)",
+            params = {
+                event = 'Renewed-Banking:client:changeAccountName',
+                args = data
+            }
+        }
+    }
+    TriggerClientEvent("qb-menu:client:openMenu", source, table)
+end)
+
+RegisterNetEvent("Renewed-Banking:server:viewMemberManagement", function(data)
+    local Player = QBCore.Functions.GetPlayer(source)
+
     local table = {{
         isMenuHeader = true,
         header = "Los Santos Banking"
@@ -527,4 +563,32 @@ RegisterNetEvent('Renewed-Banking:server:removeAccountMember', function(data)
     end
     cachedAccounts[data.account].auth[targetCID] = nil
     MySQL.update('UPDATE bank_accounts_new SET auth = ? WHERE id = ?',{json.encode(tmp), data.account})
+end)
+
+RegisterNetEvent('Renewed-Banking:server:changeAccountName', function(account, newName)
+    local Player = QBCore.Functions.GetPlayer(source)
+    if not cachedAccounts[account] then print(("^6[^4Renewed-Banking^6] ^0 Account %s cannot be found."):format(account)) return end
+    if Player.PlayerData.citizenid ~= cachedAccounts[account].creator then print(("^6[^4Renewed-Banking^6] ^0 %s has attempted to update name of an account they didnt create."):format(GetPlayerName(source))) return end
+
+    cachedAccounts[newName] = json.decode(json.encode(cachedAccounts[account]))
+    cachedAccounts[newName].id = newName
+    cachedAccounts[newName].name = newName
+    cachedAccounts[account] = nil
+
+    for _, v in pairs(QBCore.Functions.GetPlayers()) do
+        local Player2 = QBCore.Functions.GetPlayer(v)
+        if Player2 then
+            local cid = Player2.PlayerData.citizenid
+            if #cachedPlayers[cid].accounts >= 1 then
+                for k=1, #cachedPlayers[cid].accounts do
+                    if cachedPlayers[cid].accounts[k] == account then
+                        table.remove(cachedPlayers[cid].accounts, k)
+                        cachedPlayers[cid].accounts[#cachedPlayers[cid].accounts+1] = newName
+                    end
+                end
+            end
+        end
+    end
+
+    MySQL.update('UPDATE bank_accounts_new SET id = ? WHERE id = ?',{newName, account})
 end)
