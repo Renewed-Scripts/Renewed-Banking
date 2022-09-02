@@ -263,6 +263,7 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:withdraw", function(sour
 end)
 
 local function getPlayerData(source, id)
+    print(id)
     local Player = QBCore.Functions.GetPlayer(tonumber(id))
     if not Player then Player = QBCore.Functions.GetPlayerByCitizenId(id) end
     if not Player then
@@ -270,17 +271,21 @@ local function getPlayerData(source, id)
         if Player and not cachedPlayers[Player.PlayerData.citizenid] then
             local offlineTrans = {}
             local pushingP = promise.new()
-            MySQL.query('SELECT * FROM player_transactions WHERE id = @id ', {['@id'] = cid}, function(account)
-                pushingP:resolve(json.decode(account[1].transactions))
+            MySQL.query('SELECT * FROM player_transactions WHERE id = @id ', {['@id'] = id}, function(account)
+                local resolve = account[1] and json.decode(account[1].transactions) or {}
+                pushingP:resolve(resolve)
             end)
             offlineTrans = Citizen.Await(pushingP)
-            cachedPlayers[cid] = {transactions = offlineTrans}
+            cachedPlayers[id] = {transactions = offlineTrans}
         end
     end
     if not Player then
         local msg = ("Cannot Find Account(%s) To Transfer To"):format(id)
         print("^6[^4Renewed-Banking^6] ^0 "..msg)
-        QBCore.Functions.Notify(source, msg, 'error', 5000)
+
+        if source then
+            QBCore.Functions.Notify(source, msg, 'error', 5000)
+        end
     end
     return Player
 end
@@ -592,3 +597,88 @@ RegisterNetEvent('Renewed-Banking:server:changeAccountName', function(account, n
 
     MySQL.update('UPDATE bank_accounts_new SET id = ? WHERE id = ?',{newName, account})
 end)
+
+-- Should only use this on very secure backends to avoid anyone using this as this is a server side ONLY export --
+local function changeAccountName(account, newName)
+    if not account or not newName then return end
+    if cachedAccounts[newName] then print(("^6[^4Renewed-Banking^6] ^0 Account %s already exsist"):format(account)) return end
+    if not cachedAccounts[account] then print(("^6[^4Renewed-Banking^6] ^0 Account %s cannot be found."):format(account)) return end
+
+    cachedAccounts[newName] = json.decode(json.encode(cachedAccounts[account]))
+    cachedAccounts[newName].id = newName
+    cachedAccounts[newName].name = newName
+    cachedAccounts[account] = nil
+
+    for _, v in pairs(QBCore.Functions.GetPlayers()) do
+        local Player2 = QBCore.Functions.GetPlayer(v)
+        if Player2 then
+            local cid = Player2.PlayerData.citizenid
+            if #cachedPlayers[cid].accounts >= 1 then
+                for k=1, #cachedPlayers[cid].accounts do
+                    if cachedPlayers[cid].accounts[k] == account then
+                        table.remove(cachedPlayers[cid].accounts, k)
+                        cachedPlayers[cid].accounts[#cachedPlayers[cid].accounts+1] = newName
+                    end
+                end
+            end
+        end
+    end
+
+    MySQL.update('UPDATE bank_accounts_new SET id = ? WHERE id = ?',{newName, account})
+
+    return true
+end exports("changeAccountName", changeAccountName)
+
+
+local function addAccountMember(account, member)
+    if not account or not member then return end
+
+    if not cachedAccounts[account] then print(("^6[^4Renewed-Banking^6] ^0 Account %s cannot be found."):format(account)) return end
+
+    local Player2 = getPlayerData(false, member)
+    if not Player2 then print(("^6[^4Renewed-Banking^6] ^0 Player with ID '%s' could not be found."):format(member)) return end
+
+    local targetCID = Player2.PlayerData.citizenid
+    if not Player2.Offline and cachedPlayers[targetCID] then
+        cachedPlayers[targetCID].accounts[#cachedPlayers[targetCID].accounts+1] = account
+    end
+
+    local auth = {}
+    for k, _ in pairs(cachedAccounts[account].auth) do auth[#auth+1] = k end
+    auth[#auth+1] = targetCID
+    cachedAccounts[account].auth[targetCID] = true
+    MySQL.update('UPDATE bank_accounts_new SET auth = ? WHERE id = ?',{json.encode(auth), account})
+
+end exports("addAccountMember", addAccountMember)
+
+local function removeAccountMember(account, member)
+    local Player2 = getPlayerData(false, member)
+    print(json.encode(Player2))
+    if not Player2 then print(("^6[^4Renewed-Banking^6] ^0 Player with ID '%s' could not be found."):format(data.cid)) return end
+    if not cachedAccounts[account] then print(("^6[^4Renewed-Banking^6] ^0 Account %s cannot be found."):format(account)) return end
+
+    local targetCID = Player2.PlayerData.citizenid
+
+    local tmp = {}
+    for k in pairs(cachedAccounts[account].auth) do
+        if targetCID ~= k then
+            tmp[#tmp+1] = k
+        end
+    end
+
+
+    if not Player2.Offline and cachedPlayers[targetCID] then
+        local newAccount = {}
+        if #cachedPlayers[targetCID].accounts >= 1 then
+            for k=1, #cachedPlayers[targetCID].accounts do
+                if cachedPlayers[targetCID].accounts[k] ~= account then
+                    newAccount[#newAccount+1] = cachedPlayers[targetCID].accounts[k]
+                end
+            end
+        end
+        cachedPlayers[targetCID].accounts = newAccount
+    end
+    MySQL.update('UPDATE bank_accounts_new SET auth = ? WHERE id = ?',{json.encode(tmp), account})
+
+
+end exports("removeAccountMember", removeAccountMember)
