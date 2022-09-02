@@ -70,7 +70,7 @@
         margin-left: 15rem;
     }
     .transaction h6 {
-        color: rgb(106, 106, 106);
+        color: #74888f;
         padding-bottom: 0.5rem;
         border-bottom: 2px dotted;
         margin: 1rem 0 1.5rem;
