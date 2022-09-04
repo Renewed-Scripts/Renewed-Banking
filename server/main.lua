@@ -550,12 +550,13 @@ RegisterNetEvent('Renewed-Banking:server:removeAccountMember', function(data)
 
     local targetCID = Player2.PlayerData.citizenid
     local tmp = {}
-    if not Player2.Offline and cachedPlayers[targetCID] then
-        for k in pairs(cachedAccounts[data.account].auth) do
-            if targetCID ~= k then
-                tmp[#tmp+1] = k
-            end
+    for k in pairs(cachedAccounts[data.account].auth) do
+        if targetCID ~= k then
+            tmp[#tmp+1] = k
         end
+    end
+
+    if not Player2.Offline and cachedPlayers[targetCID] then
         local newAccount = {}
         if #cachedPlayers[targetCID].accounts >= 1 then
             for k=1, #cachedPlayers[targetCID].accounts do
@@ -678,7 +679,8 @@ local function removeAccountMember(account, member)
         end
         cachedPlayers[targetCID].accounts = newAccount
     end
+
+    cachedAccounts[account].auth[targetCID] = nil
+
     MySQL.update('UPDATE bank_accounts_new SET auth = ? WHERE id = ?',{json.encode(tmp), account})
-
-
 end exports("removeAccountMember", removeAccountMember)
