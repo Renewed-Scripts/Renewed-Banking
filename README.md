@@ -66,3 +66,13 @@ exports['Renewed-Banking']:removeAccountMoney(account, amount)
 
 ---@return complete<boolean> - true | false
 ```
+
+## qb-managment conversion
+```lua
+exports['qb-management']:GetAccount => exports['Renewed-Banking']:getAccountMoney
+exports['qb-management']:AddMoney => exports['Renewed-Banking']:addAccountMoney
+exports['qb-management']:RemoveMoney => exports['Renewed-Banking']:removeAccountMoney
+exports['qb-management']:GetGangAccount=> exports['Renewed-Banking']:getAccountMoney
+exports['qb-management']:AddGangMoney=> exports['Renewed-Banking']:addAccountMoney
+exports['qb-management']:RemoveGangMoney=> exports['Renewed-Banking']:removeAccountMoney
+```
