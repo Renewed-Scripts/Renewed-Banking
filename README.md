@@ -2,7 +2,7 @@
 
 # Project Description
 This resource was created by myself and was not a fork of any of the other banking resources. So lets not say "Isnt this x banking 🤓" because its not. The user interface was heavily inspired by No Pixels Banking Interface.
-This resource is an replacement for qb-banking, qb-atm, qb-managment
+This resource is a replacement for qb-banking, qb-atm, qb-managment
 
 # Dependencies
 * [oxmysql](https://github.com/overextended/oxmysql)
