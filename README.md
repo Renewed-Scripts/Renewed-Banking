@@ -1,12 +1,23 @@
 # Renewed-Banking
 
 # Project Description
-NoPixel Inspired Banking System Recreated In Svelte.
+This resource was created by myself and was not a fork of any of the other banking resources. So lets not say "Isnt this x banking 🤓" because its not. The user interface was heavily inspired by No Pixels Banking Interface.
+This resource is an replacement for qb-banking, qb-atm, qb-managment
 
 # Dependencies
 * [oxmysql](https://github.com/overextended/oxmysql)
-* [qb-core](https://github.com/qbcore-framework)
-* [qb-target](https://github.com/qbcore-framework/qb-target)
+* [QBCore](https://github.com/qbcore-framework/qb-core)
+* [QB-Target](https://github.com/qbcore-framework/qb-target)
+* [QB-Menu](https://github.com/qbcore-framework/qb-menu)
+* [QB-Input](https://github.com/qbcore-framework/qb-input)
+* [progressbars](https://github.com/Project-Sloth/progressbar)
+
+# Features
+* Personal, Job, Gang, Shared Accounts
+* Withdraw, Deposit, Transfer between accounts
+* Offline Player Full Support
+* QB Target Support
+* Optimized Resource (0.00ms Running At All Times)
 
 # Installation
 
