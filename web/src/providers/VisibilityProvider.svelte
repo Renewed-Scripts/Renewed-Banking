@@ -7,7 +7,8 @@
     activeAccount,
     loading,
     notify,
-    popupDetails
+    popupDetails,
+    atm
   } from '../store/stores';
   import { useNuiEvent } from '../utils/useNuiEvent';
   let isVisible: boolean;
@@ -20,7 +21,8 @@
     accounts.set(data.accounts);
     activeAccount.update(() => data.accounts[0].id)
     visibility.set(data.status);
-    loading.set(data.loading)
+    loading.set(data.loading);
+    atm.set(data.atm);
   })
 
   useNuiEvent<any>('setLoading', data => {

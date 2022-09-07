@@ -4,6 +4,7 @@ export const visibility = writable(false);
 export const loading = writable(false);
 export const notify = writable("");
 export let activeAccount = writable(null);
+export const atm = writable(false);
 
 export let popupDetails = writable({
     account: {},

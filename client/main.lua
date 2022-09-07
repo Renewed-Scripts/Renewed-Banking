@@ -12,7 +12,7 @@ local function nuiHandler(val)
     SetNuiFocus(val, val)
 end
 
-local function openBankUI()
+local function openBankUI(isAtm)
     SendNUIMessage({action = "setLoading", status = true})
     nuiHandler(true)
     QBCore.Functions.TriggerCallback('renewed-banking:server:initalizeBanking', function(result)
@@ -26,7 +26,8 @@ local function openBankUI()
                 action = "setVisible",
                 status = isVisible,
                 accounts = result,
-                loading = false
+                loading = false,
+                atm = isAtm
             })
         end)
     end)
@@ -44,7 +45,7 @@ RegisterNetEvent("Renewed-Banking:client:openBankUI", function(data)
         disableMouse = false,
         disableCombat = true,
     }, {}, {}, {}, function()
-        openBankUI()
+        openBankUI(data.atm)
         Wait(500)
         ClearPedTasksImmediately(PlayerPedId())
     end, function()
@@ -60,14 +61,6 @@ end)
 
 RegisterCommand("closeBankUI", function() nuiHandler(false) end)
 
-local targetOptions = {{
-    type = "client",
-    event = "Renewed-Banking:client:openBankUI",
-    icon = "fas fa-money-check",
-    label = "View Bank Account",
-    entity = entity
-}}
-
 local bankActions = {"deposit", "withdraw", "transfer"}
 CreateThread(function ()
     for k=1, #bankActions do
@@ -82,7 +75,14 @@ CreateThread(function ()
     end
 
     exports['qb-target']:AddTargetModel(config.atms,{
-        options = targetOptions,
+        options = {{
+            type = "client",
+            event = "Renewed-Banking:client:openBankUI",
+            icon = "fas fa-money-check",
+            label = "View Bank Account",
+            entity = entity,
+            atm = true
+        }},
         distance = 1.5
     })
 end)
@@ -106,17 +106,23 @@ local function createPeds()
         SetEntityInvincible(bankPeds[k], true)
         SetBlockingOfNonTemporaryEvents(bankPeds[k], true)
 
-        local newTarget = json.decode(json.encode(targetOptions))
-        newTarget[#newTarget+1] = {
-            type = "client",
-            event = "Renewed-Banking:client:accountManagmentMenu",
-            icon = "fas fa-money-check",
-            label = "Manage Bank Account",
-            entity = entity
-        }
-
         exports['qb-target']:AddTargetEntity(bankPeds[k], {
-            options = newTarget,
+            options = {
+                {
+                    type = "client",
+                    event = "Renewed-Banking:client:openBankUI",
+                    icon = "fas fa-money-check",
+                    label = "View Bank Account",
+                    entity = entity,
+                    atm = false
+                },
+                {
+                    type = "client",
+                    event = "Renewed-Banking:client:accountManagmentMenu",
+                    icon = "fas fa-money-check",
+                    label = "Manage Bank Account"
+                }
+            },
             distance = 2.0
         })
 

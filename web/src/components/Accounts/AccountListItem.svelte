@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { accounts, activeAccount, popupDetails } from "../../store/stores";
+    import { accounts, activeAccount, popupDetails, atm } from "../../store/stores";
     import { formatMoney } from "../../utils/misc";
     export let account:any;
 
@@ -7,11 +7,15 @@
         activeAccount.update(() => id);
     };
 
+    let isAtm: boolean;
     function handleButton(id:string, type:string) {
         let account = $accounts.find((accountItem: any) => id === accountItem.id);
         popupDetails.update(() => ({ actionType: type, account }));
     }
 
+    atm.subscribe((usingAtm: boolean) => {
+        isAtm = usingAtm;
+    });
 </script>
 
 <section class="account" on:click={()=>handleAccountClick(account.id)}>
@@ -30,7 +34,9 @@
 
     <div class="btns-group">
         {#if !account.isFrozen}
-            <button class="btn btn-green" on:click={() => handleButton(account.id, "deposit")}>Deposit</button>
+            {#if !isAtm}
+                <button class="btn btn-green" on:click={() => handleButton(account.id, "deposit")}>Deposit</button>
+            {/if}
             <button class="btn btn-orange" on:click={() => handleButton(account.id, "withdraw")}>Withdraw</button>
             <button class="btn btn-grey" on:click={() => handleButton(account.id, "transfer")}>Transfer</button>
         {:else}
