@@ -1,4 +1,5 @@
 # Renewed-Banking
+<a href='https://ko-fi.com/ushifty' target='_blank'><img height='35' style='border:0px;height:46px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' />
 
 # Project Description
 This resource was created by myself and was not a fork of any of the other banking resources. So lets not say "Isnt this x banking 🤓" because its not. The user interface was heavily inspired by No Pixels Banking Interface.
@@ -76,3 +77,9 @@ exports['qb-management']:GetGangAccount=> exports['Renewed-Banking']:getAccountM
 exports['qb-management']:AddGangMoney=> exports['Renewed-Banking']:addAccountMoney
 exports['qb-management']:RemoveGangMoney=> exports['Renewed-Banking']:removeAccountMoney
 ```
+
+ ## Change Logs
+ V1.0.1
+ ```
+ Added Banking Blips
+ ```
