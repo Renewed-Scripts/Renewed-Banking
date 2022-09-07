@@ -1,29 +1,29 @@
-<script>
+<script lang="ts">
     import { accounts, activeAccount, popupDetails, loading } from "../store/stores";
     import {fetchNui} from "../utils/fetchNui"
-    let amount = 0;
-    let comment = "";
-    let stateid = "";
-    $: account = $accounts.find((accountItem) => $activeAccount === accountItem.id);
+    let amount: number = 0;
+    let comment: string = "";
+    let stateid: string = "";
+    $: account = $accounts.find((accountItem: any) => $activeAccount === accountItem.id);
 
     function closePopup() {
-        popupDetails.update((val) => ({
+        popupDetails.update((val: any) => ({
             ...val,
-            actionType: "",
+            actionType: ""
         }));
     }
 
     function submitInput() {
-        loading.set(true)
+        loading.set(true);
         fetchNui($popupDetails.actionType, {fromAccount: $popupDetails.account.id, amount: amount, comment: comment, stateid: stateid}).then(retData => {
             setTimeout(() => {
                 if (retData !== false){
-                    accounts.set(retData)
+                    accounts.set(retData);
                 }
-                loading.set(false)
+                loading.set(false);
             }, 1000);
         })
-        closePopup()
+        closePopup();
     }
 </script>
 
@@ -49,8 +49,8 @@
             {/if}
 
             <div class="btns-group">
-                <button class="btn btn-orange" on:click={closePopup}>Cancel</button>
-                <button class="btn btn-green" on:click={() => submitInput()}>{$popupDetails.actionType}</button>
+                <button type="button" class="btn btn-orange" on:click={closePopup}>Cancel</button>
+                <button type="button" class="btn btn-green" on:click={() => submitInput()}>Confirm</button>
             </div>
         </form>
     </section>
