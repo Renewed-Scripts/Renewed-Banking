@@ -228,7 +228,7 @@ local function removeAccountMoney(account, amount)
         print(("^6[^4Renewed-Banking^6] ^0 Account not found (%s)"):format(account))
         return false
     end
-    if cachedAccounts[account].amount < amount then
+    if cachedAccounts[account].amount <= amount then
         print(("^6[^4Renewed-Banking^6] ^0 Account(%s) is too broke with balance of $%s"):format(account, amount))
         return false
     end

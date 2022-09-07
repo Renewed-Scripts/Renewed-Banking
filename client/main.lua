@@ -89,6 +89,7 @@ end)
 
 local pedSpawned = false
 local bankPeds = {}
+local blips = {}
 local function createPeds()
     if pedSpawned then return end
     for k=1, #config.peds do
@@ -118,6 +119,17 @@ local function createPeds()
             options = newTarget,
             distance = 2.0
         })
+
+
+        blips[k] = AddBlipForCoord(coords.x, coords.y, coords.z-1, coords.w)
+        SetBlipSprite(blips[k], 108)
+        SetBlipDisplay(blips[k], 4)
+        SetBlipScale  (blips[k], 0.80)
+        SetBlipColour (blips[k], 2)
+        SetBlipAsShortRange(blips[k], true)
+        BeginTextCommandSetBlipName("STRING")
+        AddTextComponentString("Bank")
+        EndTextCommandSetBlipName(blips[k])
     end
 
     pedSpawned = true
@@ -127,6 +139,7 @@ local function deletePeds()
     if not pedSpawned then return end
     for k=1, #bankPeds do
         DeletePed(bankPeds[k])
+        RemoveBlip(blips[k])
     end
 end
 
