@@ -18,7 +18,7 @@ local function openBankUI(isAtm)
     QBCore.Functions.TriggerCallback('renewed-banking:server:initalizeBanking', function(result)
         if not result then
             nuiHandler(false)
-            QBCore.Functions.Notify('Failed to load Banking Data!', 'error', 7500)
+            QBCore.Functions.Notify(Lang:t("notify.loading_failed"), 'error', 7500)
             return
         end
         SetTimeout(1000, function()
@@ -34,10 +34,7 @@ local function openBankUI(isAtm)
 end
 
 RegisterNetEvent("Renewed-Banking:client:openBankUI", function(data)
-    if not data.entity then return end
-    local isPed = IsEntityAPed(data.entity)
-    local txt = isPed and 'Opening Bank' or 'Opening ATM'
-
+    local txt = data.atm and 'Opening ATM' or 'Opening Bank'
     TaskStartScenarioInPlace(PlayerPedId(), "PROP_HUMAN_ATM", 0, 1)
     QBCore.Functions.Progressbar('Renewed-Banking', txt, math.random(3000,5000), false, true, {
         disableMovement = true,
@@ -79,7 +76,7 @@ CreateThread(function ()
             type = "client",
             event = "Renewed-Banking:client:openBankUI",
             icon = "fas fa-money-check",
-            label = "View Bank Account",
+            label = Lang:t("menu.view_bank"),
             entity = entity,
             atm = true
         }},
@@ -112,7 +109,7 @@ local function createPeds()
                     type = "client",
                     event = "Renewed-Banking:client:openBankUI",
                     icon = "fas fa-money-check",
-                    label = "View Bank Account",
+                    label = Lang:t("menu.view_bank"),
                     entity = entity,
                     atm = false
                 },
@@ -120,7 +117,7 @@ local function createPeds()
                     type = "client",
                     event = "Renewed-Banking:client:accountManagmentMenu",
                     icon = "fas fa-money-check",
-                    label = "Manage Bank Account"
+                    label = Lang:t("menu.manage_bank")
                 }
             },
             distance = 2.0
@@ -184,18 +181,18 @@ RegisterNetEvent('Renewed-Banking:client:accountManagmentMenu', function(data)
     local table = {
         {
             isMenuHeader = true,
-            header = "Los Santos Banking"
+            header = Lang:t("menu.bank_name")
         },
         {
-            header = "Create New Account",
-            txt = "Create a new sub bank account!",
+            header = Lang:t("menu.create_account"),
+            txt = Lang:t("menu.create_account_txt"),
             params = {
                 event = 'Renewed-Banking:client:createAccountMenu'
             }
         },
         {
-            header = "Manage Existing Accounts",
-            txt = "View existing accounts!",
+            header = Lang:t("menu.manage_account"),
+            txt = Lang:t("menu.manage_account_txt"),
             params = {
                 event = 'Renewed-Banking:client:viewAccountsMenu'
             }
@@ -206,11 +203,11 @@ end)
 
 RegisterNetEvent('Renewed-Banking:client:createAccountMenu', function(data)
     local dialog = exports['qb-input']:ShowInput({
-        header = "Los Santos Banking",
-        submitText = "Create Account",
+        header = Lang:t("menu.bank_name"),
+        submitText = Lang:t("menu.create_account"),
         inputs = {
             {
-                text = "Account ID (NO SPACES)",
+                text = Lang:t("menu.account_id"),
                 name = "accountid",
                 type = "text",
                 isRequired = true
@@ -229,11 +226,11 @@ end)
 
 RegisterNetEvent('Renewed-Banking:client:addAccountMember', function(data)
     local dialog = exports['qb-input']:ShowInput({
-        header = "Los Santos Banking",
-        submitText = "Add Account Member",
+        header = Lang:t("menu.bank_name"),
+        submitText = Lang:t("menu.add_account_member"),
         inputs = {
             {
-                text = "Citizen/State ID",
+                text = Lang:t("menu.citizen_id"),
                 name = "accountid",
                 type = "text",
                 isRequired = true
@@ -248,11 +245,11 @@ end)
 
 RegisterNetEvent('Renewed-Banking:client:changeAccountName', function(data)
     local dialog = exports['qb-input']:ShowInput({
-        header = "Los Santos Banking",
-        submitText = "Change Account Name",
+        header = Lang:t("menu.bank_name"),
+        submitText = Lang:t("menu.change_account_name"),
         inputs = {
             {
-                text = "Account ID (NO SPACES)",
+                text = Lang:t("menu.account_id"),
                 name = "accountid",
                 type = "text",
                 isRequired = true
