@@ -164,12 +164,12 @@ AddEventHandler('onResourceStop', function(resource)
 end)
 
 AddEventHandler('onResourceStart', function(resource)
-   if resource == GetCurrentResourceName() then
-      Wait(100)
-      if FullyLoaded then
-        createPeds()
-      end
-   end
+    if resource == GetCurrentResourceName() then
+        Wait(100)
+        if FullyLoaded then
+            createPeds()
+        end
+    end
 end)
 
 RegisterNetEvent("Renewed-Banking:client:sendNotification", function(msg)
