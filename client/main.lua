@@ -147,6 +147,7 @@ local function deletePeds()
 end
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
+    Wait(100)
     createPeds()
     SendNUIMessage({
         action = "updateLocale",
@@ -155,11 +156,13 @@ RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
+    Wait(100)
     deletePeds()
 end)
 
 AddEventHandler('onResourceStop', function(resource)
     if resource == GetCurrentResourceName() then
+    	Wait(100)
         deletePeds()
     end
 end)
