@@ -1,4 +1,4 @@
-local Translations = {
+Translations = {
     time = {
         weeks = "%{time} uger siden",
         aweek = "En uge siden",
@@ -56,7 +56,7 @@ local Translations = {
         account_title = " Konto / ",
         account = " Konto ",
         amount = "Mængde",
-        comment "Kommentar",
+        comment = "Kommentar",
         transfer = "Virksomhed eller Borger ID",
         cancel = "Annuller",
         confirm = "Send",
@@ -67,7 +67,13 @@ local Translations = {
         message = "Beksed",
         accounts = "Kontoer",
         balance = "Tilgængelig Saldo",
-        frozen = "Konto Status: Frosset"
+        frozen = "Konto Status: Frosset",
+        org = "Organisation",
+        personal = "Personlig",
+        personal_acc = "Personlig Konto / ",
+        deposit_but = "Depositum",
+        withdraw_but = "Hæv Penge",
+        transfer_but = "Overførsel"
     }
 }
 Lang = Locale:new({

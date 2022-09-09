@@ -1,4 +1,4 @@
-local Translations = {
+Translations = {
     time = {
         weeks = "%{time} weeks ago",
         aweek = "A week ago",
@@ -51,6 +51,29 @@ local Translations = {
         change_account_name = "Change Account Name",
         citizen_id = "Citizen/State ID",
         add_account_member = "Add Account Member"
+    },
+    ui = {
+        account_title = " Account / ",
+        account = " Account ",
+        amount = "Amount",
+        comment = "Comment",
+        transfer = "Business or Citizen ID",
+        cancel = "Cancel",
+        confirm = "Submit",
+        cash = "Cash: $",
+        transactions = "Transactions",
+        bank_name = "Los Santos Bank",
+        select_account = "Select any Account",
+        message = "Message",
+        accounts = "Accounts",
+        balance = "Available Balance",
+        frozen = "Account Status: Frozen",
+        org = "Organization",
+        personal = "Personal",
+        personal_acc = "Personal Account / ",
+        deposit_but = "Deposit",
+        withdraw_but = "Withdraw",
+        transfer_but = "Transfer",
     }
 }
 Lang = Locale:new({

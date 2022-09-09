@@ -1,4 +1,4 @@
-local Translations = {
+Translations = {
     time = {
         weeks = "Acum %{time} saptamani",
         aweek = "Acum o saptamana",
@@ -51,6 +51,29 @@ local Translations = {
         change_account_name = "Schimba Numele Contului",
         citizen_id = "Citizen/ID Stat",
         add_account_member = "Adauga Membru"
+    },
+    ui = {
+        account_title = " Cont / ",
+        account = " Cont ",
+        amount = "Suma",
+        comment = "Descriere",
+        transfer = "Nume business sau Citizen ID",
+        cancel = "Anuleaza",
+        confirm = "Confirma",
+        cash = "Cash: $",
+        transactions = "Tranzactii",
+        bank_name = "Banca Los Santos",
+        select_account = "Selecteaza un cont",
+        message = "Mesaj",
+        accounts = "Conturi",
+        balance = "Balanta Valabila",
+        frozen = "Status Cont: Inghetat",
+        org = "Organizare",
+        personal = "Personal",
+        personal_acc = "Cont Personal / ",
+        deposit_but = "Depozit",
+        withdraw_but = "Retrage",
+        transfer_but = "Transfer",
     }
 }
 Lang = Locale:new({

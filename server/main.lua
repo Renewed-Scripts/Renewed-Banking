@@ -10,7 +10,7 @@ CreateThread(function()
             v.auth = json.decode(v.auth)
             cachedAccounts[job] = { --  cachedAccounts[#cachedAccounts+1]
                 id = job,
-                type = "Organization",
+                type = Lang:t("ui.org"),
                 name = QBCore.Shared.Jobs[job] and QBCore.Shared.Jobs[job].label or QBCore.Shared.Gangs[job] and QBCore.Shared.Gangs[job].label or job,
                 frozen = v.isFrozen == 1,
                 amount = v.amount,
@@ -63,7 +63,7 @@ local function getBankData(source)
 
     bankData[#bankData+1] = {
         id = Player.PlayerData.citizenid,
-        type = "Personal",
+        type = Lang:t("ui.personal"),
         name = ("%s %s"):format(Player.PlayerData.charinfo.firstname, Player.PlayerData.charinfo.lastname),
         frozen = cachedPlayers[Player.PlayerData.citizenid].isFrozen,
         amount = Player.PlayerData.money.bank,
@@ -213,7 +213,7 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:deposit", function(sourc
         else
             Player.Functions.AddMoney('bank', amount, data.comment)
         end
-        handleTransaction(data.fromAccount,"Personal Account / " .. data.fromAccount, amount, data.comment, name, data.fromAccount, "deposit")
+        handleTransaction(data.fromAccount,Lang:t("ui.personal_acc") .. data.fromAccount, amount, data.comment, name, data.fromAccount, "deposit")
         local bankData = getBankData(source)
         cb(bankData)
     else
@@ -251,7 +251,7 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:withdraw", function(sour
     end
     if canWithdraw then
         Player.Functions.AddMoney('cash', amount, data.comment)
-        handleTransaction(data.fromAccount,"Personal Account / " .. data.fromAccount, amount, data.comment, data.fromAccount, name, "withdraw")
+        handleTransaction(data.fromAccount,Lang:t("ui.personal_acc") .. data.fromAccount, amount, data.comment, data.fromAccount, name, "withdraw")
         local bankData = getBankData(source)
         cb(bankData)
     else
@@ -328,8 +328,8 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:transfer", function(sour
             if Player.Functions.RemoveMoney('bank', amount, data.comment) then
                 addAccountMoney(data.stateid, amount)
                 local name = ("%s %s"):format(Player.PlayerData.charinfo.firstname, Player.PlayerData.charinfo.lastname)
-                local transaction = handleTransaction(data.fromAccount, ("Personal Account / %s"):format(data.fromAccount), amount, data.comment, name, cachedAccounts[data.stateid].name, "withdraw")
-                handleTransaction(data.stateid, ("Personal Account / %s"):format(data.fromAccount), amount, data.comment, name, cachedAccounts[data.stateid].name, "deposit", transaction.trans_id)
+                local transaction = handleTransaction(data.fromAccount, Lang:t("ui.personal_acc") .. data.fromAccount, amount, data.comment, name, cachedAccounts[data.stateid].name, "withdraw")
+                handleTransaction(data.stateid, Lang:t("ui.personal_acc") .. data.fromAccount, amount, data.comment, name, cachedAccounts[data.stateid].name, "deposit", transaction.trans_id)
             else
                 TriggerClientEvent('Renewed-Banking:client:sendNotification', source, Lang:t("notify.not_enough_money"))
                 cb(false)
@@ -347,8 +347,8 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:transfer", function(sour
                 Player2.Functions.AddMoney('bank', amount, data.comment)
                 local name = ("%s %s"):format(Player.PlayerData.charinfo.firstname, Player.PlayerData.charinfo.lastname)
                 local name2 = ("%s %s"):format(Player2.PlayerData.charinfo.firstname, Player2.PlayerData.charinfo.lastname)
-                local transaction = handleTransaction(data.fromAccount, ("Personal Account / %s"):format(data.fromAccount), amount, data.comment, name, name2, "withdraw")
-                handleTransaction(data.stateid, ("Personal Account / %s"):format(data.fromAccount), amount, data.comment, name, name2, "deposit", transaction.trans_id)
+                local transaction = handleTransaction(data.fromAccount, Lang:t("ui.personal_acc") .. data.fromAccount, amount, data.comment, name, name2, "withdraw")
+                handleTransaction(data.stateid, Lang:t("ui.personal_acc") .. data.fromAccount, amount, data.comment, name, name2, "deposit", transaction.trans_id)
             else
                 TriggerClientEvent('Renewed-Banking:client:sendNotification', source, Lang:t("notify.not_enough_money"))
                 cb(false)
@@ -365,7 +365,7 @@ RegisterNetEvent('Renewed-Banking:server:createNewAccount', function(accountid)
     if cachedAccounts[accountid] then QBCore.Functions.Notify(source, Lang:t("notify.account_taken"), "error") return end
     cachedAccounts[accountid] = {
         id = accountid,
-        type = "Organization",
+        type = Lang:t("ui.org"),
         name = accountid,
         frozen = 0,
         amount = 0,

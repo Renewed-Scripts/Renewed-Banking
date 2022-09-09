@@ -8,7 +8,8 @@
     loading,
     notify,
     popupDetails,
-    atm
+    atm,
+    translations
   } from '../store/stores';
   import { useNuiEvent } from '../utils/useNuiEvent';
   let isVisible: boolean;
@@ -36,6 +37,10 @@
     }, 3500);
   })
 
+  useNuiEvent<any>("updateLocale", data => {
+    translations.set(data.translations);
+  })
+  
   onMount(() => {
     const keyHandler = (e: KeyboardEvent) => {
       if (isVisible && ['Escape'].includes(e.code)) {

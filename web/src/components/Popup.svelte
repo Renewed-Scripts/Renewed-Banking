@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { accounts, activeAccount, popupDetails, loading } from "../store/stores";
+    import { accounts, activeAccount, popupDetails, loading, translations } from "../store/stores";
     import {fetchNui} from "../utils/fetchNui"
     let amount: number = 0;
     let comment: string = "";
@@ -29,28 +29,28 @@
 
 <section class="popup-container">
     <section class="popup-content">
-        <h2> {$popupDetails.account.type} Account / {$popupDetails.account.id}</h2>
+        <h2> {$popupDetails.account.type}{$translations.account}/ {$popupDetails.account.id}</h2>
         <form action="#">
             <div class="form-row">
-                <label for="amount">Amount</label>
+                <label for="amount">{$translations.amount}</label>
                 <input bind:value={amount} type="number" name="amount" id="amount" placeholder="$" />
             </div>
 
             <div class="form-row">
-                <label for="comment">Comment</label>
+                <label for="comment">{$translations.comment}</label>
                 <input bind:value={comment} type="text" name="comment" id="comment" placeholder="//" />
             </div>
 
             {#if $popupDetails.actionType === "transfer"}
                 <div class="form-row">
-                    <label for="stateId">Business or Citizen ID</label>
+                    <label for="stateId">{$translations.transfer}</label>
                     <input bind:value={stateid} type="text" name="stateId" id="stateId" placeholder="#" />
                 </div>
             {/if}
 
             <div class="btns-group">
-                <button type="button" class="btn btn-orange" on:click={closePopup}>Cancel</button>
-                <button type="button" class="btn btn-green" on:click={() => submitInput()}>Confirm</button>
+                <button type="button" class="btn btn-orange" on:click={closePopup}>{$translations.cancel}</button>
+                <button type="button" class="btn btn-green" on:click={() => submitInput()}>{$translations.confirm}</button>
             </div>
         </form>
     </section>

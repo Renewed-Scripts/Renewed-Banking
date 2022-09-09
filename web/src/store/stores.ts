@@ -12,3 +12,4 @@ export let popupDetails = writable({
 });
 
 export const accounts = writable<any>([]);
+export const translations = writable<any>([]);

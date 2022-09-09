@@ -148,6 +148,10 @@ end
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     createPeds()
+    SendNUIMessage({
+        action = "updateLocale",
+        translations = Translations.ui,
+    })
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
@@ -165,6 +169,10 @@ AddEventHandler('onResourceStart', function(resource)
         Wait(100)
         if FullyLoaded then
             createPeds()
+            SendNUIMessage({
+                action = "updateLocale",
+                translations = Translations.ui,
+            })
         end
     end
 end)
