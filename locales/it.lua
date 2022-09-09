@@ -1,4 +1,4 @@
-local Translations = {
+Translations = {
     time = {
         weeks = "%{time} settimane fà",
         aweek = "Una settimana fà",
