@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { accounts } from "../../store/stores";
+    import { accounts, translations } from "../../store/stores";
     import AccountListItem from "./AccountListItem.svelte";
 </script>
 
 <aside>
-    <h3 class="heading">Accounts</h3>
+    <h3 class="heading">{$translations.accounts}</h3>
 
     <section class="scroller">
         {#each $accounts as account (account.id)}

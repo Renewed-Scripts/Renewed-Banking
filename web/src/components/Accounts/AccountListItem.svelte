@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { accounts, activeAccount, popupDetails } from "../../store/stores";
+    import { accounts, activeAccount, popupDetails, atm, translations } from "../../store/stores";
     import { formatMoney } from "../../utils/misc";
     export let account:any;
 
@@ -7,34 +7,40 @@
         activeAccount.update(() => id);
     };
 
+    let isAtm: boolean;
     function handleButton(id:string, type:string) {
         let account = $accounts.find((accountItem: any) => id === accountItem.id);
         popupDetails.update(() => ({ actionType: type, account }));
     }
 
+    atm.subscribe((usingAtm: boolean) => {
+        isAtm = usingAtm;
+    });
 </script>
 
 <section class="account" on:click={()=>handleAccountClick(account.id)}>
     <h4>
-        {account.type} Account / {account.id}
+        {account.type}{$translations.account}/ {account.id}
     </h4>
     <h5>
-        {account.type} Account <br />
+        {account.type}{$translations.account}<br />
         <span>{account.name}</span>
     </h5>
 
     <div class="price">
         <strong>{formatMoney(account.amount)}</strong> <br />
-        <span>Available Balance</span>
+        <span>{$translations.balance}</span>
     </div>
 
     <div class="btns-group">
         {#if !account.isFrozen}
-            <button class="btn btn-green" on:click={() => handleButton(account.id, "deposit")}>Deposit</button>
-            <button class="btn btn-orange" on:click={() => handleButton(account.id, "withdraw")}>Withdraw</button>
-            <button class="btn btn-grey" on:click={() => handleButton(account.id, "transfer")}>Transfer</button>
+            {#if !isAtm}
+                <button class="btn btn-green" on:click={() => handleButton(account.id, "deposit")}>{$translations.deposit_but}</button>
+            {/if}
+            <button class="btn btn-orange" on:click={() => handleButton(account.id, "withdraw")}>{$translations.withdraw_but}</button>
+            <button class="btn btn-grey" on:click={() => handleButton(account.id, "transfer")}>{$translations.transfer_but}</button>
         {:else}
-            Account Status: Frozen
+            {$translations.frozen}
         {/if}
     </div>
 </section>

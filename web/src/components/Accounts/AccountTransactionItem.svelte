@@ -1,6 +1,7 @@
 <script lang="ts">
     export let transaction: any;
     import { formatMoney } from "../../utils/misc";
+    import { translations } from "../../store/stores";
 </script>
 
 <section class="transaction">
@@ -25,7 +26,7 @@
     </h4>
 
     <h6>
-        Message <br />
+        {$translations.message} <br />
         {transaction.message}
     </h6>
 </section>

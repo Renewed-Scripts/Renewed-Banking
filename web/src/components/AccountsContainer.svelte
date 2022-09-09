@@ -1,7 +1,7 @@
 <script lang="ts">
     import AccountsList from "./Accounts/AccountsList.svelte";
     import AccountTransactionsList from "./Accounts/AccountTransactionsList.svelte";
-    import { accounts } from '../store/stores';
+    import { accounts, translations } from '../store/stores';
 </script>
 
 <div class="main">
@@ -9,7 +9,7 @@
         <AccountsList />
         <AccountTransactionsList />
     </section>
-    <h5>Cash: ${$accounts[0].cash}</h5>
+    <h5>{$translations.cash}{$accounts[0].cash}</h5>
 </div>
 
 <style>

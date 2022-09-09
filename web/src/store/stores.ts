@@ -4,6 +4,7 @@ export const visibility = writable(false);
 export const loading = writable(false);
 export const notify = writable("");
 export let activeAccount = writable(null);
+export const atm = writable(false);
 
 export let popupDetails = writable({
     account: {},
@@ -11,3 +12,4 @@ export let popupDetails = writable({
 });
 
 export const accounts = writable<any>([]);
+export const translations = writable<any>([]);

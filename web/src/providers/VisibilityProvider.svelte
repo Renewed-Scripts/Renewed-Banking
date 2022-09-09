@@ -7,7 +7,9 @@
     activeAccount,
     loading,
     notify,
-    popupDetails
+    popupDetails,
+    atm,
+    translations
   } from '../store/stores';
   import { useNuiEvent } from '../utils/useNuiEvent';
   let isVisible: boolean;
@@ -20,7 +22,8 @@
     accounts.set(data.accounts);
     activeAccount.update(() => data.accounts[0].id)
     visibility.set(data.status);
-    loading.set(data.loading)
+    loading.set(data.loading);
+    atm.set(data.atm);
   })
 
   useNuiEvent<any>('setLoading', data => {
@@ -34,6 +37,10 @@
     }, 3500);
   })
 
+  useNuiEvent<any>("updateLocale", data => {
+    translations.set(data.translations);
+  })
+  
   onMount(() => {
     const keyHandler = (e: KeyboardEvent) => {
       if (isVisible && ['Escape'].includes(e.code)) {

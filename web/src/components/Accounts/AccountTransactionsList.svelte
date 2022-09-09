@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { accounts, activeAccount } from "../../store/stores";
+    import { accounts, activeAccount, translations } from "../../store/stores";
     import AccountTransactionItem from "./AccountTransactionItem.svelte";
 
     $: account = $accounts.find((accountItem: any) => $activeAccount === accountItem.id);
@@ -7,11 +7,11 @@
 
 <section class="transactions-container">
     <h3 class="heading">
-        <span>Transactions</span>
+        <span>{$translations.transactions}</span>
 
         <div>
             <img src="./img/bank.png" alt="bang icon" />
-            <span>Los Santos Bank</span>
+            <span>{$translations.bank_name}</span>
         </div>
     </h3>
 
@@ -21,7 +21,7 @@
                 <AccountTransactionItem {transaction}/>
             {/each}
         {:else}
-            Select any Account
+            {$translations.select_account}
         {/if}
     </section>
 </section>
