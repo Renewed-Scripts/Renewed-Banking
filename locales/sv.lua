@@ -1,0 +1,82 @@
+Translations = {
+    time = {
+        weeks = "%{time} veckor sedan",
+        aweek = "En vecka sedan",
+        days = "%{time} dagar sedan",
+        aday = "Igår",
+        hours = "%{time} timmar sedan",
+        ahour = "En timme sen",
+        mins = "%{time} minuter sedan",
+        amin = "En minut sen",
+        secs = "Några sekunder sedan"
+    },
+    logs = {
+        invalid_account = "^6[^4Renewed-Banking^6] ^0 Inget konto hittades (%{account})",
+        broke_account = "^6[^4Renewed-Banking^6] ^0 Konto(%{account}) har för låg balans. Nuvarande balans: $%{amount}",
+        illegal_action = "^6[^4Renewed-Banking^6] ^0 %{name} har försökt göra något mot ett konto dom inte skapat.",
+        no_account = "^6[^4Renewed-Banking^6] ^0 %{name} har försökt göra något mot ett konto dom inte skapat.",
+        existing_account = "^6[^4Renewed-Banking^6] ^0 Konto %{account} finns redan!"
+    },
+    notify = {
+        invalid_amount = "Ogiltig summa till %{type}",
+        not_enough_money = "Kontot har för låg balans!",
+        comp_transaction = "%{name} har %{type} $%{amount}",
+        fail_transfer = "Misslyckad överföring till ogiltigt konto!",
+        account_taken = "Konto ID används redan!",
+        unknown_player = "Person med ID '%{id}' kunde inte hittas!",
+        loading_failed = "Misslyckades att ladda bank information!"
+    },
+    menu = {
+        bank_name = "Handelsbanken",
+        view_members = "Visa alla kontots medlemmar!",
+        no_account = "Konto kunde inte hittas",
+        no_account_txt = "Du måste vara kontoägaren",
+        manage_members = "Hantera kontots medlemmar",
+        manage_members_txt = "Visa existerande & Lägg till medlemmar",
+        edit_acc_name = "Ändra kontots namn",
+        edit_acc_name_txt = "Transaktioner kommer inte att uppdatera gamla namn",
+        remove_member_txt = "Ta bort konto medlem!",
+        add_member = "Lägg till person till kontot",
+        add_member_txt = "Var försiktig med vem du lägger till(Kräver Medborgar ID)",
+        remove_member = "Är du säker på att du vill ta bort personen?",
+        remove_member_txt2 = "Medborgar ID: %{id}; Detta kan inte ångras.",
+        back = "Tillbaka",
+        view_bank = "Visa bankkonto",
+        manage_bank = "Hantera bankkonto",
+        create_account = "Skapa nytt bankkonto",
+        create_account_txt = "Skapa ett nytt undre bankkonto!",
+        manage_account = "Hantera existerande konton",
+        manage_account_txt = "Visa existerande konton!",
+        account_id = "Konto ID (Inga mellanrum)",
+        change_account_name = "Ändra konto namn",
+        citizen_id = "Medborgar/Statligt ID",
+        add_account_member = "Lägg till konto medlem"
+    },
+    ui = {
+        account_title = " Konto / ",
+        account = " Konto ",
+        amount = "Summa",
+        comment = "Kommentar",
+        transfer = "Företags eller Medborgar ID",
+        cancel = "Avbryt",
+        confirm = "Skicka",
+        cash = "Pengar: kr",
+        transactions = "Betalningar",
+        bank_name = "Handelsbanken",
+        select_account = "Välj ett konto",
+        message = "Meddelande",
+        accounts = "Konton",
+        balance = "Tillgänglig balans",
+        frozen = "Konto status: Fryst",
+        org = "Organisation",
+        personal = "Personligt",
+        personal_acc = "Personligt konto / ",
+        deposit_but = "Sätt in",
+        withdraw_but = "Ta ut",
+        transfer_but = "Överför"
+    }
+}
+Lang = Locale:new({
+    phrases = Translations,
+    warnOnMissing = true
+})
