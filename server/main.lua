@@ -167,9 +167,8 @@ local function handleTransaction(account, title, amount, message, issuer, receiv
     }
     if cachedAccounts[account] then
         table.insert(cachedAccounts[account].transactions, 1, transaction)
-        MySQL.query("INSERT INTO bank_accounts_new (id, amount, transactions) VALUES (:id, :amount, :transactions) ON DUPLICATE KEY UPDATE amount = :amount, transactions = :transactions",{
+        MySQL.query("INSERT INTO bank_accounts_new (id, transactions) VALUES (:id, :transactions) ON DUPLICATE KEY UPDATE transactions = :transactions",{
             ['id'] = account,
-            ['amount'] = cachedAccounts[account].amount,
             ['transactions'] = json.encode(cachedAccounts[account].transactions)
         })
     elseif cachedPlayers[account] then
@@ -192,12 +191,17 @@ local function getAccountMoney(account)
     return cachedAccounts[account].amount
 end exports('getAccountMoney', getAccountMoney)
 
+local function updateBalance(account)
+    MySQL.query("UPDATE bank_accounts_new SET amount = ? WHERE id = ?",{ cachedAccounts[account].amount, account })
+end
+
 local function addAccountMoney(account, amount)
     if not cachedAccounts[account] then
         Lang:t("logs.invalid_account",{account=account})
         return false
     end
     cachedAccounts[account].amount += amount
+    updateBalance(account)
     return true
 end exports('addAccountMoney', addAccountMoney)
 
@@ -233,6 +237,7 @@ local function removeAccountMoney(account, amount)
     end
 
     cachedAccounts[account].amount -= amount
+    updateBalance(account)
     return true
 end exports('removeAccountMoney', removeAccountMoney)
 
