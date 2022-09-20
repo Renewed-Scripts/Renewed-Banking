@@ -252,7 +252,7 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:withdraw", function(sour
     if cachedAccounts[data.fromAccount] then
         canWithdraw = removeAccountMoney(data.fromAccount, amount)
     else
-        canWithdraw = Player.Functions.RemoveMoney('bank', amount, data.comment)
+        canWithdraw = Player.PlayerData.money.bank >= amount and Player.Functions.RemoveMoney('bank', amount, data.comment) or false
     end
     if canWithdraw then
         Player.Functions.AddMoney('cash', amount, data.comment)
@@ -332,7 +332,7 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:transfer", function(sour
         local name = ("%s %s"):format(Player.PlayerData.charinfo.firstname, Player.PlayerData.charinfo.lastname)
         if not data.comment or data.comment == "" then data.comment = Lang:t("notify.comp_transaction",{name = data.fromAccount, type="transfered", amount = amount}) end
         if cachedAccounts[data.stateid] then
-            if Player.Functions.RemoveMoney('bank', amount, data.comment) then
+            if Player.PlayerData.money.bank >= amount and Player.Functions.RemoveMoney('bank', amount, data.comment) then
                 addAccountMoney(data.stateid, amount)
                 local transaction = handleTransaction(data.fromAccount, Lang:t("ui.personal_acc") .. data.fromAccount, amount, data.comment, name, cachedAccounts[data.stateid].name, "withdraw")
                 handleTransaction(data.stateid, Lang:t("ui.personal_acc") .. data.fromAccount, amount, data.comment, name, cachedAccounts[data.stateid].name, "deposit", transaction.trans_id)
@@ -349,7 +349,7 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:transfer", function(sour
                 return
             end
 
-            if Player.Functions.RemoveMoney('bank', amount, data.comment) then
+            if Player.PlayerData.money.bank >= amount and Player.Functions.RemoveMoney('bank', amount, data.comment) then
                 Player2.Functions.AddMoney('bank', amount, data.comment)
                 local name2 = ("%s %s"):format(Player2.PlayerData.charinfo.firstname, Player2.PlayerData.charinfo.lastname)
                 local transaction = handleTransaction(data.fromAccount, Lang:t("ui.personal_acc") .. data.fromAccount, amount, data.comment, name, name2, "withdraw")
