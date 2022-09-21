@@ -210,7 +210,11 @@ end exports('addAccountMoney', addAccountMoney)
 QBCore.Functions.CreateCallback("Renewed-Banking:server:deposit", function(source, cb, data)
     local Player = QBCore.Functions.GetPlayer(source)
     local amount = tonumber(data.amount)
-    if not amount or amount < 1 then return QBCore.Functions.Notify(source, Lang:t("notify.invalid_amount",{type="deposit"}), 'error', 5000) end
+    if not amount or amount < 1 then
+        QBCore.Functions.Notify(source, Lang:t("notify.invalid_amount",{type="deposit"}), 'error', 5000)
+        cb(false)
+        return
+    end
     local name = ("%s %s"):format(Player.PlayerData.charinfo.firstname, Player.PlayerData.charinfo.lastname)
     if not data.comment or data.comment == "" then data.comment = Lang:t("notify.comp_transaction",{name = name, type="deposited", amount = amount}) end
     if Player.Functions.RemoveMoney('cash', amount, data.comment) then
@@ -224,7 +228,6 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:deposit", function(sourc
         cb(bankData)
     else
         TriggerClientEvent('Renewed-Banking:client:sendNotification', source, Lang:t("notify.not_enough_money"))
-        cb(false)
     end
 end)
 
@@ -246,7 +249,11 @@ end exports('removeAccountMoney', removeAccountMoney)
 QBCore.Functions.CreateCallback("Renewed-Banking:server:withdraw", function(source, cb, data)
     local Player = QBCore.Functions.GetPlayer(source)
     local amount = tonumber(data.amount)
-    if not amount or amount < 1 then return QBCore.Functions.Notify(source, Lang:t("notify.invalid_amount",{type="withdraw"}), 'error', 5000) end
+    if not amount or amount < 1 then
+        QBCore.Functions.Notify(source, Lang:t("notify.invalid_amount",{type="withdraw"}), 'error', 5000)
+        cb(false)
+        return
+    end
     local name = ("%s %s"):format(Player.PlayerData.charinfo.firstname, Player.PlayerData.charinfo.lastname)
     if not data.comment or data.comment == "" then data.comment = Lang:t("notify.comp_transaction",{name = name, type="withdrawed", amount = amount}) end
 
@@ -296,7 +303,11 @@ end
 QBCore.Functions.CreateCallback("Renewed-Banking:server:transfer", function(source, cb, data)
     local Player = QBCore.Functions.GetPlayer(source)
     local amount = tonumber(data.amount)
-    if not amount or amount < 1 then return QBCore.Functions.Notify(source, Lang:t("notify.invalid_amount",{type="transfer"}), 'error', 5000) end
+    if not amount or amount < 1 then
+        QBCore.Functions.Notify(source, Lang:t("notify.invalid_amount",{type="transfer"}), 'error', 5000)
+        cb(false)
+        return
+    end
     if cachedAccounts[data.fromAccount] then
         if not data.comment or data.comment == "" then data.comment = Lang:t("notify.comp_transaction",{name = data.fromAccount, type="transfered", amount = amount}) end
         if cachedAccounts[data.stateid] then
