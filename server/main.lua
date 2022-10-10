@@ -228,6 +228,7 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:deposit", function(sourc
         cb(bankData)
     else
         TriggerClientEvent('Renewed-Banking:client:sendNotification', source, Lang:t("notify.not_enough_money"))
+        cb(false)
     end
 end)
 
