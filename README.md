@@ -13,7 +13,7 @@ This resource is a replacement for qb-banking, qb-atm, qb-managment
 * [QB-Target](https://github.com/qbcore-framework/qb-target)
 * [QB-Menu](https://github.com/qbcore-framework/qb-menu)
 * [QB-Input](https://github.com/qbcore-framework/qb-input)
-* [progressbars](https://github.com/Project-Sloth/progressbar)
+* [progressbars](https://github.com/Renewed-Scripts/progressbar)
 
 # Features
 * Personal, Job, Gang, Shared Accounts
