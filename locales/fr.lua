@@ -56,7 +56,7 @@ Translations = {
         account_title = " Compte / ",
         account = " Compte ",
         amount = "Montant",
-        comment "Commentaire",
+        comment = "Commentaire",
         transfer = "ID d'entreprise ou de citoyen",
         cancel = "Annulé",
         confirm = "Soumettre",
@@ -77,6 +77,6 @@ Translations = {
     }
 }
 Lang = Locale:new({
-    phrases = Traductions,
-    warnOnMissing = vrai
+    phrases = Translations,
+    warnOnMissing = true
 })

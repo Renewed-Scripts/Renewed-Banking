@@ -1,7 +1,6 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 local cachedAccounts = {}
 local cachedPlayers = {}
-local cachedOffline = {}
 
 CreateThread(function()
     MySQL.query('SELECT * FROM bank_accounts_new', {}, function(accounts)
@@ -281,13 +280,12 @@ local function getPlayerData(source, id)
     if not Player then
         Player = QBCore.Functions.GetOfflinePlayerByCitizenId(id)
         if Player and not cachedPlayers[Player.PlayerData.citizenid] then
-            local offlineTrans = {}
             local pushingP = promise.new()
             MySQL.query('SELECT * FROM player_transactions WHERE id = @id ', {['@id'] = id}, function(account)
                 local resolve = account[1] and json.decode(account[1].transactions) or {}
                 pushingP:resolve(resolve)
             end)
-            offlineTrans = Citizen.Await(pushingP)
+            local offlineTrans = Citizen.Await(pushingP)
             cachedPlayers[id] = {transactions = offlineTrans}
         end
     end
@@ -438,37 +436,6 @@ RegisterNetEvent("Renewed-Banking:server:viewMemberManagement", function(data)
     TriggerClientEvent("Renewed-Banking:client:viewMemberManagement", source, retData)
 end)
 
-RegisterNetEvent('Renewed-Banking:server:removeMemberConfirmation', function(data)
-    local Player = QBCore.Functions.GetPlayer(source)
-    local table = {
-        {
-            isMenuHeader = true,
-            header = Lang:t("menu.bank_name")
-        },
-        {
-            header = Lang:t("menu.back"),
-            icon = "fa-solid fa-angle-left",
-            params = {
-                isServer =true,
-                event = "Renewed-Banking:server:viewAccountMenu",
-                args = data
-            }
-        },
-        {
-            header = Lang:t("menu.remove_member"),
-            txt = Lang:t("menu.remove_member_txt2", {id=data.cid}),
-            params = {
-                isServer =true,
-                event = 'Renewed-Banking:server:removeAccountMember',
-                args = data
-            }
-        }
-    }
-
-    TriggerClientEvent("qb-menu:client:openMenu", source, table)
-
-end)
-
 RegisterNetEvent('Renewed-Banking:server:addAccountMember', function(account, member)
     local Player = QBCore.Functions.GetPlayer(source)
 
@@ -482,7 +449,7 @@ RegisterNetEvent('Renewed-Banking:server:addAccountMember', function(account, me
     end
 
     local auth = {}
-    for k,v in pairs(cachedAccounts[account].auth) do auth[#auth+1] = k end
+    for k in pairs(cachedAccounts[account].auth) do auth[#auth+1] = k end
     auth[#auth+1] = targetCID
     cachedAccounts[account].auth[targetCID] = true
     MySQL.update('UPDATE bank_accounts_new SET auth = ? WHERE id = ?',{json.encode(auth), account})

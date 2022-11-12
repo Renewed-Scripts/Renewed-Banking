@@ -77,7 +77,7 @@ CreateThread(function ()
             icon = 'fas fa-money-check',
             label = Lang:t("menu.view_bank"),
             atm = true,
-            canInteract = function(entity, distance, coords, name, bone)
+            canInteract = function(_, distance)
                 return distance < 2.5 and true or false
             end
         }})
@@ -133,7 +133,7 @@ local function createPeds()
             icon = 'fas fa-money-check',
             label = Lang:t("menu.view_bank"),
             atm = true,
-            canInteract = function(entity, distance, coords, name, bone)
+            canInteract = function(_, distance)
                 return distance < 4.5 and true or false
             end
         }}
@@ -144,7 +144,7 @@ local function createPeds()
             icon = 'fas fa-money-check',
             label = Lang:t("menu.manage_bank"),
             atm = true,
-            canInteract = function(entity, distance, coords, name, bone)
+            canInteract = function(_, distance)
                 return distance < 4.5 and true or false
             end
         }
@@ -157,7 +157,6 @@ local function createPeds()
                     event = "Renewed-Banking:client:openBankUI",
                     icon = "fas fa-money-check",
                     label = Lang:t("menu.view_bank"),
-                    entity = entity,
                     atm = false
                 }
             },
@@ -170,7 +169,6 @@ local function createPeds()
                     event = "Renewed-Banking:client:openBankUI",
                     icon = "fas fa-money-check",
                     label = Lang:t("menu.view_bank"),
-                    entity = entity,
                     atm = false
                 },
                 {
@@ -454,7 +452,6 @@ local bankingMenus = {
                     header = v,
                     txt = Lang:t("menu.remove_member_txt"),
                     params = {
-                        isServer =true,
                         event = 'Renewed-Banking:client:removeMemberConfirmation',
                         args = {
                             account = account,

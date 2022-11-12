@@ -54,7 +54,7 @@ Translations = {
         account_id = "Account ID (NO SPACES)",
         change_account_name = "Change Account Name",
         citizen_id = "Citizen/State ID",
-        add_account_member = "Add Account Member", 
+        add_account_member = "Add Account Member",
         givecash = "Usage /givecash [ID] [AMOUNT]",
     },
     ui = {
