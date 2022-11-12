@@ -406,124 +406,36 @@ end)
 
 RegisterNetEvent("Renewed-Banking:server:getPlayerAccounts", function()
     local Player = QBCore.Functions.GetPlayer(source)
-
-    local table = {{
-        isMenuHeader = true,
-        header = Lang:t("menu.bank_name")
-    }}
     local accounts = cachedPlayers[Player.PlayerData.citizenid].accounts
+    local data = {}
     if #accounts >= 1 then
         for k=1, #accounts do
             if cachedAccounts[accounts[k]].creator == Player.PlayerData.citizenid then
-                table[#table+1] = {
-                    header = accounts[k],
-                    txt = Lang:t("menu.view_members"),
-                    params = {
-                        isServer =true,
-                        event = 'Renewed-Banking:server:viewAccountMenu',
-                        args = {
-                            account = accounts[k],
-                        }
-                    }
-                }
+                data[#data+1] = accounts[k]
             end
         end
     end
-    if #table == 1 then
-        table[#table+1] = {
-            header = Lang:t("menu.no_account"),
-            txt = Lang:t("menu.no_account_txt"),
-            isMenuHeader = true
-        }
-    end
-    TriggerClientEvent("qb-menu:client:openMenu", source, table)
-end)
-
-RegisterNetEvent("Renewed-Banking:server:viewAccountMenu", function(data)
-    local Player = QBCore.Functions.GetPlayer(source)
-
-    local table = {
-        {
-            isMenuHeader = true,
-            header = Lang:t("menu.bank_name")
-        },
-        {
-            header = Lang:t("menu.manage_members"),
-            txt = Lang:t("menu.manage_members_txt"),
-            params = {
-                isServer =true,
-                event = 'Renewed-Banking:server:viewMemberManagement',
-                args = data
-            }
-        },
-        {
-            header = Lang:t("menu.edit_acc_name"),
-            txt = Lang:t("menu.edit_acc_name_txt"),
-            params = {
-                event = 'Renewed-Banking:client:changeAccountName',
-                args = data
-            }
-        }
-    }
-    TriggerClientEvent("qb-menu:client:openMenu", source, table)
+    TriggerClientEvent("Renewed-Banking:client:accountsMenu", source, data)
 end)
 
 RegisterNetEvent("Renewed-Banking:server:viewMemberManagement", function(data)
     local Player = QBCore.Functions.GetPlayer(source)
 
-    local table = {{
-        isMenuHeader = true,
-        header = Lang:t("menu.bank_name")
-    }}
     local account = data.account
+    local retData = {
+        account = account,
+        members = {}
+    }
+
     for k,_ in pairs(cachedAccounts[account].auth) do
         local Player2 = getPlayerData(source, k)
-        local charInfo = Player2.PlayerData.charinfo
         if Player.PlayerData.citizenid ~= Player2.PlayerData.citizenid then
-            table[#table+1] = {
-                header = ("%s %s"):format(charInfo.firstname, charInfo.lastname),
-                txt = Lang:t("menu.remove_member_txt"),
-                params = {
-                    isServer =true,
-                    event = 'Renewed-Banking:server:removeMemberConfirmation',
-                    args = {
-                        account = account,
-                        cid = k,
-                    }
-                }
-            }
+            local charInfo = Player2.PlayerData.charinfo
+            retData.members[k] = ("%s %s"):format(charInfo.firstname, charInfo.lastname)
         end
     end
-    table[#table+1] = {
-        header = Lang:t("menu.add_member"),
-        txt = Lang:t("menu.add_member_txt"),
-        params = {
-            event = 'Renewed-Banking:client:addAccountMember',
-            args = {
-                account = account
-            }
-        }
-    }
-    TriggerClientEvent("qb-menu:client:openMenu", source, table)
-end)
 
-RegisterNetEvent('Renewed-Banking:server:addAccountMember', function(account, member)
-    local Player = QBCore.Functions.GetPlayer(source)
-
-    if Player.PlayerData.citizenid ~= cachedAccounts[account].creator then print(Lang:t("logs.illegal_action", {name=GetPlayerName(source)})) return end
-    local Player2 = getPlayerData(source, member)
-    if not Player2 then return end
-
-    local targetCID = Player2.PlayerData.citizenid
-    if not Player2.Offline and cachedPlayers[targetCID] then
-        cachedPlayers[targetCID].accounts[#cachedPlayers[targetCID].accounts+1] = account
-    end
-
-    local auth = {}
-    for k,v in pairs(cachedAccounts[account].auth) do auth[#auth+1] = k end
-    auth[#auth+1] = targetCID
-    cachedAccounts[account].auth[targetCID] = true
-    MySQL.update('UPDATE bank_accounts_new SET auth = ? WHERE id = ?',{json.encode(auth), account})
+    TriggerClientEvent("Renewed-Banking:client:viewMemberManagement", source, retData)
 end)
 
 RegisterNetEvent('Renewed-Banking:server:removeMemberConfirmation', function(data)
@@ -555,6 +467,25 @@ RegisterNetEvent('Renewed-Banking:server:removeMemberConfirmation', function(dat
 
     TriggerClientEvent("qb-menu:client:openMenu", source, table)
 
+end)
+
+RegisterNetEvent('Renewed-Banking:server:addAccountMember', function(account, member)
+    local Player = QBCore.Functions.GetPlayer(source)
+
+    if Player.PlayerData.citizenid ~= cachedAccounts[account].creator then print(Lang:t("logs.illegal_action", {name=GetPlayerName(source)})) return end
+    local Player2 = getPlayerData(source, member)
+    if not Player2 then return end
+
+    local targetCID = Player2.PlayerData.citizenid
+    if not Player2.Offline and cachedPlayers[targetCID] then
+        cachedPlayers[targetCID].accounts[#cachedPlayers[targetCID].accounts+1] = account
+    end
+
+    local auth = {}
+    for k,v in pairs(cachedAccounts[account].auth) do auth[#auth+1] = k end
+    auth[#auth+1] = targetCID
+    cachedAccounts[account].auth[targetCID] = true
+    MySQL.update('UPDATE bank_accounts_new SET auth = ? WHERE id = ?',{json.encode(auth), account})
 end)
 
 RegisterNetEvent('Renewed-Banking:server:removeAccountMember', function(data)
@@ -699,3 +630,43 @@ local function removeAccountMember(account, member)
 
     MySQL.update('UPDATE bank_accounts_new SET auth = ? WHERE id = ?',{json.encode(tmp), account})
 end exports("removeAccountMember", removeAccountMember)
+
+exports("getAccountTransactions", function(account)
+    if cachedAccounts[account] then
+        return cachedAccounts[account].transactions
+    elseif cachedPlayers[account] then
+        return cachedPlayers[account].transactions
+    end
+    print(Lang:t("logs.invalid_account",{account=account}))
+    return false
+end)
+
+QBCore.Commands.Add('givecash', Lang:t('menu.givecash'), {{name = 'id', help = 'Player ID'}, {name = 'amount', help = 'Amount'}}, true, function(source, args)
+    local src = source
+    local id = tonumber(args[1])
+    local amount = math.ceil(tonumber(args[2]))
+    local Player = QBCore.Functions.GetPlayer(src)
+    if not Player then return end
+    if not id or not amount then TriggerClientEvent('QBCore:Notify', src, Lang:t('menu.givecash'), "error") return end
+
+    local iPlayer = QBCore.Functions.GetPlayer(id)
+    if not iPlayer then TriggerClientEvent('QBCore:Notify', src, Lang:t('notify.unknown_player', {id=id}), "error") return end
+
+    if Player.PlayerData.metadata["isdead"] then TriggerClientEvent('QBCore:Notify', src, Lang:t('notify.dead'), "error") return end
+    local distance = Player.PlayerData.metadata["inlaststand"] and 3.0 or 10.0
+    if #(GetEntityCoords(GetPlayerPed(src)) - GetEntityCoords(GetPlayerPed(id))) > distance then TriggerClientEvent('QBCore:Notify', src, Lang:t('notify.too_far_away'), "error") return end
+    if amount < 0 then TriggerClientEvent('QBCore:Notify', src, Lang:t('notify.invalid_amount', {type="give"}), "error") return end
+
+    if Player.Functions.RemoveMoney('cash', amount) then
+        if iPlayer.Functions.AddMoney('cash', amount) then
+            local nameA = ("%s %s"):format(Player.PlayerData.charinfo.firstname, Player.PlayerData.charinfo.lastname)
+            local nameB = ("%s %s"):format(iPlayer.PlayerData.charinfo.firstname, iPlayer.PlayerData.charinfo.lastname)
+            TriggerClientEvent('QBCore:Notify', src, Lang:t('notify.give_cash',{id = nameB, cash = tostring(amount)}), "success")
+            TriggerClientEvent('QBCore:Notify', id, Lang:t('notify.received_cash',{id = nameA, cash = tostring(amount)}), "success")
+        else -- Return player cash
+            Player.Functions.AddMoney('cash', amount)
+        end
+    else
+        TriggerClientEvent('QBCore:Notify', src, Lang:t('notify.not_enough_money'), "error")
+    end
+end)

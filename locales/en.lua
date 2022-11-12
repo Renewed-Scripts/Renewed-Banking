@@ -24,7 +24,11 @@ Translations = {
         fail_transfer = "Failed to transfer to unknown account!",
         account_taken = "Account ID is already in use",
         unknown_player = "Player with ID '%{id}' could not be found.",
-        loading_failed = "Failed to load Banking Data!"
+        loading_failed = "Failed to load Banking Data!",
+        dead = "Action failed, you're dead ",
+        too_far_away = "Action failed, too far away",
+        give_cash = "Successfully gave $%{cash} to ID %{id}",
+        received_cash = "Successfully received $%{cash} from ID %{id}"
     },
     menu = {
         bank_name = "Los Santos Banking",
@@ -50,7 +54,8 @@ Translations = {
         account_id = "Account ID (NO SPACES)",
         change_account_name = "Change Account Name",
         citizen_id = "Citizen/State ID",
-        add_account_member = "Add Account Member"
+        add_account_member = "Add Account Member", 
+        givecash = "Usage /givecash [ID] [AMOUNT]",
     },
     ui = {
         account_title = " Account / ",
