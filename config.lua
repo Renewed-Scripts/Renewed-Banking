@@ -6,9 +6,10 @@ config = {
         `prop_fleeca_atm`
     },
     peds = {
-        [1] = {
+        [1] = { -- Pacific Standard
             model = 'u_m_m_bankman',
-            coords = vector4(241.44, 227.19, 106.29, 170.43)
+            coords = vector4(241.44, 227.19, 106.29, 170.43),
+            createAccounts = true
         },
         [2] = {
             model = 'ig_barry',
@@ -34,9 +35,10 @@ config = {
             model = 'ig_barry',
             coords = vector4(1174.8, 2708.2, 38.09, 178.52)
         },
-        [8] = {
+        [8] = { -- paleto
             model = 'u_m_m_bankman',
-            coords = vector4(-112.22, 6471.01, 31.63, 134.18)
+            coords = vector4(-112.22, 6471.01, 31.63, 134.18),
+            createAccounts = true
         }
     }
 }
