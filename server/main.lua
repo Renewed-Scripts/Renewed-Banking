@@ -95,12 +95,28 @@ local function getBankData(source)
         bankData[1].transactions[k].time = getTimeElapsed(time-bankData[1].transactions[k].time)
     end
 
-    local job = json.decode(json.encode(cachedAccounts[Player.PlayerData.job.name]))
-    if job and QBCore.Shared.Jobs[Player.PlayerData.job.name].grades[tostring(Player.PlayerData.job.grade.level)].bankAuth then
-        for k=1, #job.transactions do
-            job.transactions[k].time = getTimeElapsed(time-job.transactions[k].time)
+    if config.renewedMultiJob then
+        local jobs = exports['qb-phone']:getJobs(cid)
+
+        for k,v in pairs(jobs) do
+            if cachedAccounts[k] then
+                local job = json.decode(json.encode(cachedAccounts[k]))
+                if job and QBCore.Shared.Jobs[k].grades[tostring(v.grade)].bankAuth then
+                    for i=1, #job.transactions do
+                        job.transactions[i].time = getTimeElapsed(time-job.transactions[i].time)
+                    end
+                    bankData[#bankData+1] = job
+                end
+            end
         end
-        bankData[#bankData+1] = job
+    else
+        local job = json.decode(json.encode(cachedAccounts[Player.PlayerData.job.name]))
+        if job and QBCore.Shared.Jobs[Player.PlayerData.job.name].grades[tostring(Player.PlayerData.job.grade.level)].bankAuth then
+            for k=1, #job.transactions do
+                job.transactions[k].time = getTimeElapsed(time-job.transactions[k].time)
+            end
+            bankData[#bankData+1] = job
+        end
     end
 
     local gang = json.decode(json.encode(cachedAccounts[Player.PlayerData.gang.name]))

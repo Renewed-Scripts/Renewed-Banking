@@ -1,4 +1,5 @@
 config = {
+    renewedMultiJob = true, -- https://github.com/Renewed-Scripts/qb-phone Built into the qb-phone edit.
     atms = {
         `prop_atm_01`,
         `prop_atm_02`,
