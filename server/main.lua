@@ -257,7 +257,7 @@ QBCore.Functions.CreateCallback("Renewed-Banking:server:withdraw", function(sour
     local name = ("%s %s"):format(Player.PlayerData.charinfo.firstname, Player.PlayerData.charinfo.lastname)
     if not data.comment or data.comment == "" then data.comment = Lang:t("notify.comp_transaction",{name = name, type="withdrawed", amount = amount}) end
 
-    local canWithdraw = false
+    local canWithdraw
     if cachedAccounts[data.fromAccount] then
         canWithdraw = removeAccountMoney(data.fromAccount, amount)
     else

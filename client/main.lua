@@ -78,7 +78,7 @@ CreateThread(function ()
             label = Lang:t("menu.view_bank"),
             atm = true,
             canInteract = function(_, distance)
-                return distance < 2.5 and true or false
+                return distance < 2.5
             end
         }})
         return
@@ -134,7 +134,7 @@ local function createPeds()
             label = Lang:t("menu.view_bank"),
             atm = false,
             canInteract = function(_, distance)
-                return distance < 4.5 and true or false
+                return distance < 4.5
             end
         }}
         exports.ox_target:addLocalEntity(peds.basic, targetOpts)
@@ -145,7 +145,7 @@ local function createPeds()
             label = Lang:t("menu.manage_bank"),
             atm = false,
             canInteract = function(_, distance)
-                return distance < 4.5 and true or false
+                return distance < 4.5
             end
         }
         exports.ox_target:addLocalEntity(peds.adv, targetOpts)
@@ -220,16 +220,15 @@ AddEventHandler('onResourceStop', function(resource)
 end)
 
 AddEventHandler('onResourceStart', function(resource)
-    if resource == GetCurrentResourceName() then
-        Wait(100)
-        if FullyLoaded then
-            createPeds()
-            SendNUIMessage({
-                action = "updateLocale",
-                translations = Translations.ui,
-            })
-        end
-    end
+    if resource ~= GetCurrentResourceName() then return end
+    if not FullyLoaded then return end
+    Wait(100)
+    createPeds()
+    SendNUIMessage({
+        action = "updateLocale",
+        translations = Translations.ui,
+    })
+
 end)
 
 RegisterNetEvent("Renewed-Banking:client:sendNotification", function(msg)
