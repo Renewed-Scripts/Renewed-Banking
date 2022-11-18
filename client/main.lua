@@ -132,7 +132,7 @@ local function createPeds()
             event = 'Renewed-Banking:client:openBankUI',
             icon = 'fas fa-money-check',
             label = Lang:t("menu.view_bank"),
-            atm = true,
+            atm = false,
             canInteract = function(_, distance)
                 return distance < 4.5 and true or false
             end
@@ -143,7 +143,7 @@ local function createPeds()
             event = 'Renewed-Banking:client:accountManagmentMenu',
             icon = 'fas fa-money-check',
             label = Lang:t("menu.manage_bank"),
-            atm = true,
+            atm = false,
             canInteract = function(_, distance)
                 return distance < 4.5 and true or false
             end
