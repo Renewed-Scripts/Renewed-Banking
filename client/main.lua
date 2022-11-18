@@ -211,12 +211,17 @@ RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
 end)
 
 AddEventHandler('onResourceStop', function(resource)
-    if resource == GetCurrentResourceName() then
+    if resource ~= GetCurrentResourceName() then return end
+    if lib then
         exports.ox_target:removeModel(config.atms, {'renewed_banking_openui'})
         exports.ox_target:removeEntity(peds.basic, {'renewed_banking_openui'})
         exports.ox_target:removeEntity(peds.adv, {'renewed_banking_openui','renewed_banking_accountmng'})
-        deletePeds()
+    else
+        exports['qb-target']:RemoveTargetModel(config.atms, Lang:t("menu.view_bank"))
+        exports['qb-target']:RemoveTargetEntity(peds.basic, Lang:t("menu.view_bank"))
+        exports['qb-target']:RemoveTargetEntity(peds.adv, {Lang:t("menu.view_bank"), Lang:t("menu.manage_bank")})
     end
+    deletePeds()
 end)
 
 AddEventHandler('onResourceStart', function(resource)
