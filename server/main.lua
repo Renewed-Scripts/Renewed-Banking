@@ -449,7 +449,7 @@ RegisterNetEvent("Renewed-Banking:server:viewMemberManagement", function(data)
         end
     end
 
-    TriggerClientEvent("Renewed-Banking:client:viewMemberManagement", source, retData)
+    TriggerClientEvent("Renewed-Banking:client:viewMemberManagement", Player.PlayerData.source, retData)
 end)
 
 RegisterNetEvent('Renewed-Banking:server:addAccountMember', function(account, member)
