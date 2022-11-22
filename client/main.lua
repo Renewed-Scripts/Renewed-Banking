@@ -78,7 +78,7 @@ CreateThread(function ()
             label = Lang:t("menu.view_bank"),
             atm = true,
             canInteract = function(_, distance)
-                return distance < 2.5 and true or false
+                return distance < 2.5
             end
         }})
         return
@@ -132,9 +132,9 @@ local function createPeds()
             event = 'Renewed-Banking:client:openBankUI',
             icon = 'fas fa-money-check',
             label = Lang:t("menu.view_bank"),
-            atm = true,
+            atm = false,
             canInteract = function(_, distance)
-                return distance < 4.5 and true or false
+                return distance < 4.5
             end
         }}
         exports.ox_target:addLocalEntity(peds.basic, targetOpts)
@@ -143,9 +143,9 @@ local function createPeds()
             event = 'Renewed-Banking:client:accountManagmentMenu',
             icon = 'fas fa-money-check',
             label = Lang:t("menu.manage_bank"),
-            atm = true,
+            atm = false,
             canInteract = function(_, distance)
-                return distance < 4.5 and true or false
+                return distance < 4.5
             end
         }
         exports.ox_target:addLocalEntity(peds.adv, targetOpts)
@@ -211,25 +211,29 @@ RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
 end)
 
 AddEventHandler('onResourceStop', function(resource)
-    if resource == GetCurrentResourceName() then
+    if resource ~= GetCurrentResourceName() then return end
+    if lib then
         exports.ox_target:removeModel(config.atms, {'renewed_banking_openui'})
         exports.ox_target:removeEntity(peds.basic, {'renewed_banking_openui'})
         exports.ox_target:removeEntity(peds.adv, {'renewed_banking_openui','renewed_banking_accountmng'})
-        deletePeds()
+    else
+        exports['qb-target']:RemoveTargetModel(config.atms, Lang:t("menu.view_bank"))
+        exports['qb-target']:RemoveTargetEntity(peds.basic, Lang:t("menu.view_bank"))
+        exports['qb-target']:RemoveTargetEntity(peds.adv, {Lang:t("menu.view_bank"), Lang:t("menu.manage_bank")})
     end
+    deletePeds()
 end)
 
 AddEventHandler('onResourceStart', function(resource)
-    if resource == GetCurrentResourceName() then
-        Wait(100)
-        if FullyLoaded then
-            createPeds()
-            SendNUIMessage({
-                action = "updateLocale",
-                translations = Translations.ui,
-            })
-        end
-    end
+    if resource ~= GetCurrentResourceName() then return end
+    if not FullyLoaded then return end
+    Wait(100)
+    createPeds()
+    SendNUIMessage({
+        action = "updateLocale",
+        translations = Translations.ui,
+    })
+
 end)
 
 RegisterNetEvent("Renewed-Banking:client:sendNotification", function(msg)
@@ -338,7 +342,6 @@ local bankingMenus = {
                         header = data[k],
                         txt = Lang:t("menu.view_members"),
                         params = {
-                            isServer =true,
                             event = 'Renewed-Banking:client:accountsMenuView',
                             args = {
                                 account = data[k],
@@ -479,7 +482,7 @@ local bankingMenus = {
                 menuOpts[#menuOpts+1] = {
                     title = v,
                     metadata = {Lang:t("menu.remove_member_txt")},
-                    serverEvent = 'Renewed-Banking:client:removeMemberConfirmation',
+                    event = 'Renewed-Banking:client:removeMemberConfirmation',
                     args = {
                         account = account,
                         cid = k,
@@ -525,7 +528,9 @@ local bankingMenus = {
                     header = Lang:t("menu.remove_member"),
                     txt = Lang:t("menu.remove_member_txt2", {id=data.cid}),
                     params = {
-                        isServer =true,
+                        isServer = true,
+                        event = 'Renewed-Banking:server:removeAccountMember',
+                        args = data
                     }
                 }
             }
