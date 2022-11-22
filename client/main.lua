@@ -342,7 +342,6 @@ local bankingMenus = {
                         header = data[k],
                         txt = Lang:t("menu.view_members"),
                         params = {
-                            isServer =true,
                             event = 'Renewed-Banking:client:accountsMenuView',
                             args = {
                                 account = data[k],
@@ -529,7 +528,9 @@ local bankingMenus = {
                     header = Lang:t("menu.remove_member"),
                     txt = Lang:t("menu.remove_member_txt2", {id=data.cid}),
                     params = {
-                        isServer =true,
+                        isServer = true,
+                        event = 'Renewed-Banking:server:removeAccountMember',
+                        args = data
                     }
                 }
             }
