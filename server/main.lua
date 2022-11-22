@@ -27,7 +27,7 @@ CreateThread(function()
 end)
 
 local function getTimeElapsed(seconds)
-    local retData = ""
+    local retData
     local minutes = math.floor(seconds / 60)
     local hours = math.floor(minutes / 60)
     local days = math.floor(hours / 24)
