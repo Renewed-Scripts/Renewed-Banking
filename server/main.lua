@@ -500,10 +500,31 @@ RegisterNetEvent('Renewed-Banking:server:removeAccountMember', function(data)
     MySQL.update('UPDATE bank_accounts_new SET auth = ? WHERE id = ?',{json.encode(tmp), data.account})
 end)
 
-RegisterNetEvent('Renewed-Banking:server:changeAccountName', function(account, newName)
-    local Player = QBCore.Functions.GetPlayer(source)
-    if not cachedAccounts[account] then print(Lang:t("logs.invalid_account",{account=account})) return end
-    if Player.PlayerData.citizenid ~= cachedAccounts[account].creator then print(Lang:t("logs.illegal_action", {name=GetPlayerName(source)})) return end
+local split = QBCore.Shared.SplitStr
+local function updateAccountName(account, newName, src)
+    if not split then split = QBCore.Shared.SplitStr end
+    if not account or not newName then return false end
+    if not cachedAccounts[account] then
+        local getTranslation = Lang:t("logs.invalid_account",{account=account})
+        print(getTranslation)
+        if src then QBCore.Functions.Notify(src, split(getTranslation, '0')[2], 'error', 5000) end
+        return false
+    end
+    if cachedAccounts[newName] then
+        local getTranslation = Lang:t("logs.existing_account",{account=account})
+        print(getTranslation)
+        if src then QBCore.Functions.Notify(src, split(getTranslation, '0')[2], 'error', 5000) end
+        return false
+    end
+    if src then
+        local Player = QBCore.Functions.GetPlayer(src)
+        if Player.PlayerData.citizenid ~= cachedAccounts[account].creator then
+            local getTranslation = Lang:t("logs.illegal_action", {name=GetPlayerName(src)})
+            print(getTranslation)
+            QBCore.Functions.Notify(src, split(getTranslation, '0')[2], 'error', 5000)
+            return false
+        end
+    end
 
     cachedAccounts[newName] = json.decode(json.encode(cachedAccounts[account]))
     cachedAccounts[newName].id = newName
@@ -526,39 +547,12 @@ RegisterNetEvent('Renewed-Banking:server:changeAccountName', function(account, n
     end
 
     MySQL.update('UPDATE bank_accounts_new SET id = ? WHERE id = ?',{newName, account})
-end)
-
--- Should only use this on very secure backends to avoid anyone using this as this is a server side ONLY export --
-local function changeAccountName(account, newName)
-    if not account or not newName then return end
-    if cachedAccounts[newName] then print(Lang:t("logs.invalid_account",{account=account})) return end
-    if not cachedAccounts[account] then print(Lang:t("logs.existing_account",{account=account})) return end
-
-    cachedAccounts[newName] = json.decode(json.encode(cachedAccounts[account]))
-    cachedAccounts[newName].id = newName
-    cachedAccounts[newName].name = newName
-    cachedAccounts[account] = nil
-
-    for _, v in pairs(QBCore.Functions.GetPlayers()) do
-        local Player2 = QBCore.Functions.GetPlayer(v)
-        if Player2 then
-            local cid = Player2.PlayerData.citizenid
-            if #cachedPlayers[cid].accounts >= 1 then
-                for k=1, #cachedPlayers[cid].accounts do
-                    if cachedPlayers[cid].accounts[k] == account then
-                        table.remove(cachedPlayers[cid].accounts, k)
-                        cachedPlayers[cid].accounts[#cachedPlayers[cid].accounts+1] = newName
-                    end
-                end
-            end
-        end
-    end
-
-    MySQL.update('UPDATE bank_accounts_new SET id = ? WHERE id = ?',{newName, account})
-
     return true
-end exports("changeAccountName", changeAccountName)
+end
 
+RegisterNetEvent('Renewed-Banking:server:changeAccountName', function(account, newName)
+    updateAccountName(account, newName, source)
+end) exports("changeAccountName", updateAccountName)-- Should only use this on very secure backends to avoid anyone using this as this is a server side ONLY export --
 
 local function addAccountMember(account, member)
     if not account or not member then return end
@@ -596,7 +590,6 @@ local function removeAccountMember(account, member)
         end
     end
 
-
     if not Player2.Offline and cachedPlayers[targetCID] then
         local newAccount = {}
         if #cachedPlayers[targetCID].accounts >= 1 then
@@ -630,26 +623,26 @@ QBCore.Commands.Add('givecash', Lang:t('menu.givecash'), {{name = 'id', help = '
     local amount = math.ceil(tonumber(args[2]))
     local Player = QBCore.Functions.GetPlayer(src)
     if not Player then return end
-    if not id or not amount then TriggerClientEvent('QBCore:Notify', src, Lang:t('menu.givecash'), "error") return end
+    if not id or not amount then QBCore.Functions.Notify(src, Lang:t('menu.givecash'), 'error', 5000) return end
 
     local iPlayer = QBCore.Functions.GetPlayer(id)
-    if not iPlayer then TriggerClientEvent('QBCore:Notify', src, Lang:t('notify.unknown_player', {id=id}), "error") return end
+    if not iPlayer then QBCore.Functions.Notify(src, Lang:t('notify.unknown_player', {id=id}), 'error', 5000) return end
 
-    if Player.PlayerData.metadata["isdead"] then TriggerClientEvent('QBCore:Notify', src, Lang:t('notify.dead'), "error") return end
+    if Player.PlayerData.metadata["isdead"] then QBCore.Functions.Notify(src, Lang:t('notify.dead'), 'error', 5000) return end
     local distance = Player.PlayerData.metadata["inlaststand"] and 3.0 or 10.0
-    if #(GetEntityCoords(GetPlayerPed(src)) - GetEntityCoords(GetPlayerPed(id))) > distance then TriggerClientEvent('QBCore:Notify', src, Lang:t('notify.too_far_away'), "error") return end
-    if amount < 0 then TriggerClientEvent('QBCore:Notify', src, Lang:t('notify.invalid_amount', {type="give"}), "error") return end
+    if #(GetEntityCoords(GetPlayerPed(src)) - GetEntityCoords(GetPlayerPed(id))) > distance then QBCore.Functions.Notify(src, Lang:t('notify.too_far_away'), 'error', 5000) return end
+    if amount < 0 then QBCore.Functions.Notify(src, Lang:t('notify.invalid_amount', {type="give"}), 'error', 5000) return end
 
     if Player.Functions.RemoveMoney('cash', amount) then
         if iPlayer.Functions.AddMoney('cash', amount) then
             local nameA = ("%s %s"):format(Player.PlayerData.charinfo.firstname, Player.PlayerData.charinfo.lastname)
             local nameB = ("%s %s"):format(iPlayer.PlayerData.charinfo.firstname, iPlayer.PlayerData.charinfo.lastname)
-            TriggerClientEvent('QBCore:Notify', src, Lang:t('notify.give_cash',{id = nameB, cash = tostring(amount)}), "success")
-            TriggerClientEvent('QBCore:Notify', id, Lang:t('notify.received_cash',{id = nameA, cash = tostring(amount)}), "success")
+            QBCore.Functions.Notify(src, Lang:t('notify.give_cash',{id = nameB, cash = tostring(amount)}), 'success', 5000)
+            QBCore.Functions.Notify(id, Lang:t('notify.received_cash',{id = nameA, cash = tostring(amount)}), 'success', 5000)
         else -- Return player cash
             Player.Functions.AddMoney('cash', amount)
         end
     else
-        TriggerClientEvent('QBCore:Notify', src, Lang:t('notify.not_enough_money'), "error")
+        QBCore.Functions.Notify(id, Lang:t('notify.not_enough_money'), 'error', 5000)
     end
 end)
