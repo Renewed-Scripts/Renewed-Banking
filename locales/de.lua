@@ -86,4 +86,4 @@ Lang = Locale:new({
     warnOnMissing = true
 })
 
---Translation by Checkerkids#2006
+--Translation by Checkerkids73#2006
