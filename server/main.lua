@@ -1,4 +1,9 @@
 local QBCore = exports['qb-core']:GetCoreObject()
+
+if not LoadResourceFile("Renewed-Banking", 'web/public/build/bundle.js') then
+    error('Unable to load UI. Build Renewed-Banking or download the latest release.\n   ^https://github.com/Renewed-Scripts/Renewed-Banking/releases/latest/download/Renewed-Banking.rar^0\n    If you are using a custom build of the UI, please make sure the resource name is Renewed-Banking (you may not rename the resource).')
+end
+
 local cachedAccounts = {}
 local cachedPlayers = {}
 
