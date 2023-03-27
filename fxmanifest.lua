@@ -7,6 +7,8 @@ version '1.0.5'
 
 lua54 'yes'
 
+provide 'qb-management'
+
 shared_scripts {
     '@qb-core/shared/locale.lua',
     'locales/en.lua',
