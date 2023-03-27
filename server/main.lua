@@ -651,3 +651,10 @@ QBCore.Commands.Add('givecash', Lang:t('menu.givecash'), {{name = 'id', help = '
         QBCore.Functions.Notify(id, Lang:t('notify.not_enough_money'), 'error', 5000)
     end
 end)
+
+AddEventHandler('__cfx_export_qb-management_GetAccount', getAccountMoney)
+AddEventHandler('__cfx_export_qb-management_AddMoney', addAccountMoney)
+AddEventHandler('__cfx_export_qb-management_RemoveMoney', removeAccountMoney)
+AddEventHandler('__cfx_export_qb-management_GetGangAccount', getAccountMoney)
+AddEventHandler('__cfx_export_qb-management_AddGangMoney', addAccountMoney)
+AddEventHandler('__cfx_export_qb-management_RemoveGangMoney', removeAccountMoney)
