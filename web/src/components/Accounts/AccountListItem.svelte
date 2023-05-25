@@ -48,10 +48,12 @@
 <style>
     .account {
         background-color: var(--clr-primary);
-        padding: 0.6rem;
-        border: 3px solid #777;
-        border-radius: 3px;
+        padding: 1rem;
+        border-radius: 10px;
         cursor: pointer;
+        box-shadow: 3px 5px 37px 4px rgba(48,48,48,0.38);
+        -webkit-box-shadow: 3px 5px 37px 4px rgba(48,48,48,0.38);
+        -moz-box-shadow: 3px 5px 37px 4px rgba(48,48,48,0.38);
     }
     .account:not(:last-child) {
         margin-bottom: 1.5rem;
@@ -76,8 +78,13 @@
         font-size: 1.6rem;
     }
 
-    .btns-group {
-        display: flex;
-        justify-content: space-between;
-    }
+    /* make first btn in btn-group take up the whole first row */
+  .btns-group > :first-child {
+    grid-column: 1 / -1;
+  }
+  .btns-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 0.5rem;
+  }
 </style>
