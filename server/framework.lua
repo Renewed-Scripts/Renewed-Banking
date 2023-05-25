@@ -131,20 +131,20 @@ function GetJobs(Player)
             for k,v in pairs(jobs) do
                 temp[#temp+1] = {
                     name = k,
-                    grade = v.grade
+                    grade = tostring(v.grade)
                 }
             end
             return temp
         else
             return {
                 name = Player.PlayerData.job.name,
-                grade = Player.PlayerData.job.grade.level
+                grade = tostring(Player.PlayerData.job.grade.level)
             }
         end
     elseif Framework == 'esx' then
         return {
             name = Player.job.name,
-            grade = Player.job.grade
+            grade = tostring(Player.job.grade)
         }
     end
 end
@@ -158,12 +158,14 @@ function GetGang(Player)
 end
 
 function IsJobAuth(job, grade)
+    local numGrade = tonumber(grade)
     if Framework == 'qb' then
-        return Jobs[job].grades[grade].bankAuth
+        return Jobs[job].grades[grade] and Jobs[job].grades[grade].bankAuth or Jobs[job].grades[numGrade] and Jobs[job].grades[numGrade].bankAuth or false
     elseif Framework == 'esx' then
-        return Jobs[job].grades[grade].name == 'boss'
+        return Jobs[job].grades[grade] and Jobs[job].grades[grade].name == 'boss' or Jobs[job].grades[numGrade] and Jobs[job].grades[numGrade].name == 'boss'or false
     end
 end
+
 function IsGangAuth(Player, gang)
     if Framework == 'qb' then
         return QBCore.Shared.Gangs[gang].grades[tostring(Player.PlayerData.gang.grade.level)].bankAuth
