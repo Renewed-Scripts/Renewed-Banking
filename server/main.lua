@@ -72,7 +72,7 @@ local function getBankData(source)
     if #jobs > 0 then
         for k=1, #jobs do
             if cachedAccounts[jobs[k].name] and IsJobAuth(jobs[k].name, jobs[k].grade) then
-                bankData[#bankData+1] = cachedAccounts[k]
+                bankData[#bankData+1] = cachedAccounts[jobs[k].name]
             end
         end
     else
@@ -118,10 +118,6 @@ local function sanitizeMessage(message)
         message = tostring(message)
     end
     message = message:gsub("'", "''"):gsub("\\", "\\\\")
-    message = message:gsub("[\1-\31\127-\255]", "�")
-    message = message:gsub("[^\0-\127]", function(c)
-        return string.format("\\u{%04X}", utf8.codepoint(c))
-    end)
     return message
 end
 

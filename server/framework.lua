@@ -1,5 +1,5 @@
 local Framework = Config.framework == 'qb' and 'qb' or Config.framework == 'esx' and 'esx' or 'Unknown'
-local QBCore, ESX, Jobs = nil, nil, nil
+local QBCore, ESX, Jobs, Gangs = nil, nil, nil, nil
 local deadPlayers = {}
 
 CreateThread(function()
@@ -9,6 +9,7 @@ CreateThread(function()
     if Framework == 'qb'then
         QBCore = exports['qb-core']:GetCoreObject()
         Jobs = QBCore.Shared.Jobs
+        Gangs = QBCore.Shared.Gangs
 
         -- Backwards Compatability
         ExportHandler("qb-management", "GetAccount", GetAccountMoney)
@@ -160,15 +161,17 @@ end
 function IsJobAuth(job, grade)
     local numGrade = tonumber(grade)
     if Framework == 'qb' then
-        return Jobs[job].grades[grade] and Jobs[job].grades[grade].bankAuth or Jobs[job].grades[numGrade] and Jobs[job].grades[numGrade].bankAuth or false
+        return Jobs[job].grades[grade] and Jobs[job].grades[grade].bankAuth or Jobs[job].grades[numGrade] and Jobs[job].grades[numGrade].bankAuth
     elseif Framework == 'esx' then
-        return Jobs[job].grades[grade] and Jobs[job].grades[grade].name == 'boss' or Jobs[job].grades[numGrade] and Jobs[job].grades[numGrade].name == 'boss'or false
+        return Jobs[job].grades[grade] and Jobs[job].grades[grade].name == 'boss' or Jobs[job].grades[numGrade] and Jobs[job].grades[numGrade].name == 'boss'
     end
 end
 
 function IsGangAuth(Player, gang)
     if Framework == 'qb' then
-        return QBCore.Shared.Gangs[gang].grades[tostring(Player.PlayerData.gang.grade.level)].bankAuth
+        local grade = tostring(Player.PlayerData.gang.grade.level)
+        local gradeNum = tonumber(grade)
+        return Gangs[gang].grades[grade] and Gangs[gang].grades[grade].bankAuth or Gangs[gang].grades[gradeNum] and Gangs[gang].grades[gradeNum].bankAuth
     elseif Framework == 'esx' then
         return false
     end
