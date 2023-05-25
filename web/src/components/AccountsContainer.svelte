@@ -2,6 +2,7 @@
     import AccountsList from "./Accounts/AccountsList.svelte";
     import AccountTransactionsList from "./Accounts/AccountTransactionsList.svelte";
     import { accounts, translations } from '../store/stores';
+    import { formatMoney } from "../utils/misc";
 </script>
 
 <div class="main">
@@ -9,7 +10,7 @@
         <AccountsList />
         <AccountTransactionsList />
     </section>
-    <h5>{$translations.cash}{$accounts[0].cash}</h5>
+    <h5><i class="fa-solid fa-wallet fa-fw"></i>{formatMoney($accounts[0].cash)}</h5>
 </div>
 
 <style>
@@ -23,6 +24,7 @@
         position: absolute;
         background-color: rgb(32, 41, 48);
         border-radius: 5px;
+        border: 4px solid #393A45;
         background-size: cover;
         background-position: center;
         opacity: 1;
@@ -35,5 +37,8 @@
     }
     h5 {
         font-size: 1.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 </style>

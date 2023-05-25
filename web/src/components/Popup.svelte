@@ -71,7 +71,7 @@
     }
 
     .popup-content {
-        max-width: 50rem;
+        max-width: 60rem;
         width: 100%;
         background-color: var(--clr-primary);
         padding: 5rem;
@@ -88,7 +88,7 @@
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
-        color: var(--clr-grey);
+        color: #F3F4F5;
         margin-bottom: 2rem;
     }
     .form-row label,
@@ -98,9 +98,13 @@
     }
 
     .form-row input {
-        padding: 0.8rem 0;
+        width: 100%;
+        border-radius: 5px;
         background-color: transparent;
         border: none;
-        border-bottom: 1px solid;
+        padding: 1.4rem;
+        margin-bottom: 1rem;
+        background-color: #2a2b33;
+        color: #fff; 
     }
 </style>
