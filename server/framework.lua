@@ -131,14 +131,14 @@ function GetJobs(Player)
             for k,v in pairs(jobs) do
                 temp[#temp+1] = {
                     name = k,
-                    grade = tostring(v.grade)
+                    grade = v.grade
                 }
             end
             return temp
         else
             return {
                 name = Player.PlayerData.job.name,
-                grade = tostring(Player.PlayerData.job.grade.level)
+                grade = Player.PlayerData.job.grade.level
             }
         end
     elseif Framework == 'esx' then
@@ -159,7 +159,7 @@ end
 
 function IsJobAuth(job, grade)
     if Framework == 'qb' then
-        return QBCore.Shared.Jobs[job].grades[grade].bankAuth
+        return Jobs[job].grades[grade].bankAuth
     elseif Framework == 'esx' then
         return Jobs[job].grades[grade].name == 'boss'
     end
