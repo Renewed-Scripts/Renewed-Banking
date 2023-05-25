@@ -1,11 +1,11 @@
 :root {
-    --clr-primary: #1e3956;
-    --clr-primary-light: #2e475d;
+    --clr-primary: #393A45;
+    --clr-primary-light: #393A45;
     --clr-primary-dark: transparant;
 
-    --clr-green: #93f074;
-    --clr-orange: #f5a067;
-    --clr-grey: #dfe1d6;
+    --clr-green: #34b8a8;
+    --clr-orange: #e08c2b;
+    --clr-grey: #505050;
 
     --font-family: "Roboto", sans-serif;
 }
@@ -38,7 +38,7 @@ img {
     height: 100%;
 }
 html {
-    font-size: 62.5%;
+    font-size: 75%;
 }
 body {
     min-height: 100vh;
@@ -58,10 +58,11 @@ h3.heading {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 1rem;
-    padding: 0.6rem 1rem;
+    font-size: 1.1em;
+    font-weight: 700;
+    padding: 1rem;
     transition: 0.25s;
-    color: #000;
+    color: rgb(243, 243, 243);
 }
 
 .btn-grey {
@@ -94,8 +95,8 @@ h3.heading {
     --size: 10rem;
     overflow-y: scroll;
     margin: auto 0;
-    height: calc(100% - 10rem);
-    margin-top: calc(var(--size) / 2);
+    height: calc(100% - 6rem);
+    /* margin-top: calc(var(--size) / 2); */
 }
 
 .scroller::-webkit-scrollbar {
