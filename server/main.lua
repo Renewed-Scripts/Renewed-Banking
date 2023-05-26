@@ -504,7 +504,7 @@ local function updateAccountName(account, newName, src)
     cachedAccounts[newName].id = newName
     cachedAccounts[newName].name = newName
     cachedAccounts[account] = nil
-    for _, id in ipairs(GetActivePlayers()) do
+    for _, id in ipairs(GetPlayers()) do
         local Player2 = GetPlayerObject(id)
         if not Player2 then goto Skip end
         local cid = GetIdentifier(Player2)
