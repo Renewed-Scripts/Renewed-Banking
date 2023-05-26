@@ -28,7 +28,7 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     initalizeBanking()
 end)
 
-AddEventHandler('esx:playerLoaded', function(xPlayer)
+RegisterNetEvent('esx:playerLoaded', function(xPlayer)
     Wait(100)
     FullyLoaded = true
     initalizeBanking()
