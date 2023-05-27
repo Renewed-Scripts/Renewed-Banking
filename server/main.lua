@@ -184,6 +184,19 @@ function AddAccountMoney(account, amount)
 end
 exports('addAccountMoney', AddAccountMoney)
 
+local function getPlayerData(source, id)
+    local Player = GetPlayerObject(tonumber(id))
+    if not Player then Player = GetPlayerObjectFromID(id) end
+    if not Player then
+        local msg = ("Cannot Find Account(%s)"):format(id)
+        print(locale("invalid_account", id))
+        if source then
+            Notify(source, {title = locale("bank_name"), description = msg, type = "error"})
+        end
+    end
+    return Player
+end
+
 lib.callback.register('Renewed-Banking:server:deposit', function(source, data)
     local Player = GetPlayerObject(source)
     local amount = tonumber(data.amount)
@@ -199,7 +212,9 @@ lib.callback.register('Renewed-Banking:server:deposit', function(source, data)
         else
             AddMoney(Player, amount, 'bank', data.comment)
         end
-        handleTransaction(data.fromAccount,locale("personal_acc") .. data.fromAccount, amount, data.comment, name, data.fromAccount, "deposit")
+        local Player2 = getPlayerData(source, data.fromAccount)
+        Player2 = Player2 and GetCharacterName(Player2) or data.fromAccount
+        handleTransaction(data.fromAccount, locale("personal_acc") .. data.fromAccount, amount, data.comment, name, Player2, "deposit")
         local bankData = getBankData(source)
         return bankData
     else
@@ -242,8 +257,10 @@ lib.callback.register('Renewed-Banking:server:withdraw', function(source, data)
         canWithdraw = funds.bank >= amount and RemoveMoney(Player, amount, 'bank', data.comment) or false
     end
     if canWithdraw then
+        local Player2 = getPlayerData(source, data.fromAccount)
+        Player2 = Player2 and GetCharacterName(Player2) or data.fromAccount
         AddMoney(Player, amount, 'cash', data.comment)
-        handleTransaction(data.fromAccount,locale("personal_acc") .. data.fromAccount, amount, data.comment, data.fromAccount, name, "withdraw")
+        handleTransaction(data.fromAccount,locale("personal_acc") .. data.fromAccount, amount, data.comment, Player2, name, "withdraw")
         local bankData = getBankData(source)
         return bankData
     else
@@ -252,19 +269,6 @@ lib.callback.register('Renewed-Banking:server:withdraw', function(source, data)
     end
 end)
 
-local function getPlayerData(source, id)
-    local Player = GetPlayerObject(tonumber(id))
-    if not Player then Player = GetPlayerObjectFromID(id) end
-    if not Player then
-        local msg = ("Cannot Find Account(%s)"):format(id)
-        print(locale("invalid_account", id))
-        if source then
-            Notify(source, {title = locale("bank_name"), description = msg, type = "error"})
-        end
-    end
-    return Player
-end
-
 lib.callback.register('Renewed-Banking:server:transfer', function(source, data)
     local Player = GetPlayerObject(source)
     local amount = tonumber(data.amount)
@@ -272,8 +276,9 @@ lib.callback.register('Renewed-Banking:server:transfer', function(source, data)
         Notify(source, {title = locale("bank_name"), description = locale("invalid_amount", "transfer"), type = "error"})
         return false
     end
+    local name = GetCharacterName(Player)
+    if not data.comment or data.comment == "" then data.comment = locale("comp_transaction", name, "transfered", amount) else sanitizeMessage(data.comment) end
     if cachedAccounts[data.fromAccount] then
-        if not data.comment or data.comment == "" then data.comment = locale("comp_transaction", data.fromAccount, "transfered", amount) else sanitizeMessage(data.comment) end
         if cachedAccounts[data.stateid] then
             local canTransfer = RemoveAccountMoney(data.fromAccount, amount)
             if canTransfer then
@@ -303,8 +308,6 @@ lib.callback.register('Renewed-Banking:server:transfer', function(source, data)
             end
         end
     else
-        local name = GetCharacterName(Player)
-        if not data.comment or data.comment == "" then data.comment = locale("comp_transaction", data.fromAccount, "transfered",  amount) else sanitizeMessage(data.comment) end
         local funds = GetFunds(Player)
         if cachedAccounts[data.stateid] then
             if funds.bank >= amount and RemoveMoney(Player, amount, 'bank', data.comment) then
@@ -501,7 +504,7 @@ local function updateAccountName(account, newName, src)
     cachedAccounts[newName].id = newName
     cachedAccounts[newName].name = newName
     cachedAccounts[account] = nil
-    for _, id in ipairs(GetActivePlayers()) do
+    for _, id in ipairs(GetPlayers()) do
         local Player2 = GetPlayerObject(id)
         if not Player2 then goto Skip end
         local cid = GetIdentifier(Player2)
