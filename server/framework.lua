@@ -20,6 +20,7 @@ CreateThread(function()
         ExportHandler("qb-management", "RemoveGangMoney", RemoveAccountMoney)
     elseif Framework == 'esx'then
         ESX = exports['es_extended']:getSharedObject()
+        ESX.RefreshJobs()
         Jobs = ESX.GetJobs()
 
         -- Backwards Compatability
