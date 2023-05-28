@@ -99,8 +99,9 @@ function CreatePeds()
 
         local coords = Config.peds[k].coords
         local bankPed = CreatePed(0, model, coords.x, coords.y, coords.z-1, coords.w, false, false)
+        local scenario = Config.peds[k].scenario
 
-        TaskStartScenarioInPlace(bankPed, 'PROP_HUMAN_STAND_IMPATIENT', 0, true)
+        TaskStartScenarioInPlace(bankPed, scenario, 0, true)
         FreezeEntityPosition(bankPed, true)
         SetEntityInvincible(bankPed, true)
         SetBlockingOfNonTemporaryEvents(bankPed, true)
