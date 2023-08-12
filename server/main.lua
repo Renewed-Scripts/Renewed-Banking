@@ -185,7 +185,7 @@ end
 exports('addAccountMoney', AddAccountMoney)
 
 local function getPlayerData(source, id)
-    local Player = GetPlayerObject(tonumber(id))
+    local Player = GetPlayerObject(tonumber(source))
     if not Player then Player = GetPlayerObjectFromID(id) end
     if not Player then
         local msg = ("Cannot Find Account(%s)"):format(id)
