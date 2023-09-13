@@ -63,6 +63,11 @@ CreateThread(function()
                         end
                     end
 
+                    -- Execute SQL queries for adding the groups.
+                    if #newGroupsToAdd > 0 then
+                        MySQL.transaction.await(newGroupsToAdd)
+                    end
+
                     -- Iterate through the groups table (Jobs & Gangs) that we transcoded from QBCore earlier and completing a diff check on the the groups currently in the Database.
                     local oldGroupsList     = {}
                     local oldGroupsToRemove = {}
@@ -75,6 +80,10 @@ CreateThread(function()
                             else
                                 groupData[group] = nil
                             end
+                        end
+                        -- Execute SQL queries for deletion of the groups.
+                        if #oldGroupsToRemove > 0 then
+                            MySQL.transaction.await(oldGroupsToRemove)
                         end
                     end
 
@@ -91,15 +100,6 @@ CreateThread(function()
                                 PrintServerConsoleMessage("Groups to Del", oldGroupsList)
                             end
                         end
-                    end
-
-                    -- Execute SQL INSERT/DELETE of groups.
-                    if #newGroupsToAdd > 0 then
-                        MySQL.transaction.await(newGroupsToAdd)
-                    end
-
-                    if Config.removeOldGroupsInDB and #oldGroupsToRemove > 0 then
-                        MySQL.transaction.await(oldGroupsToRemove)
                     end
                 end
             )
