@@ -28,7 +28,6 @@ CreateThread(function()
                 function(response)
                     -- Transcode SQL query results into a table, with the index being the group name
                     for _, v in pairs(response) do
-                        QBCore.Debug(response)
                         if v.creator == nil then
                             groupDataDB[v.id] = true
                             table.insert(currentGroupList, v.id)
