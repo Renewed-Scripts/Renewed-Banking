@@ -28,6 +28,7 @@ CreateThread(function()
                 function(response)
                     -- Transcode SQL query results into a table, with the index being the group name
                     for _, v in pairs(response) do
+                        QBCore.Debug(response)
                         if v.creator == nil then
                             groupDataDB[v.id] = true
                             table.insert(currentGroupList, v.id)
@@ -84,14 +85,21 @@ CreateThread(function()
                         end
                         if #newGroupsToAdd > 0 then
                             PrintServerConsoleMessage("Groups to Add", newGroupsList)
-                            MySQL.transaction.await(newGroupsToAdd)
                         end
                         if Config.removeOldGroupsInDB then
                             if #oldGroupsToRemove > 0 then
                                 PrintServerConsoleMessage("Groups to Del", oldGroupsList)
-                                MySQL.transaction.await(oldGroupsToRemove)
                             end
                         end
+                    end
+
+                    -- Execute SQL INSERT/DELETE of groups.
+                    if #newGroupsToAdd > 0 then
+                        MySQL.transaction.await(newGroupsToAdd)
+                    end
+
+                    if Config.removeOldGroupsInDB and #oldGroupsToRemove > 0 then
+                        MySQL.transaction.await(oldGroupsToRemove)
                     end
                 end
             )
