@@ -12,7 +12,7 @@ The 2.0 UI was redesigned by [qwadebot](https://github.com/qw-scripts) Edited by
 # Dependencies
 * [oxmysql](https://github.com/overextended/oxmysql)
 * [ox-lib](https://github.com/overextended/ox_lib)
-* [ox-target](https://github.com/overextended/ox_target)
+* [ox-target](https://github.com/overextended/ox_target) or [qb-target] (https://github.com/qbcore-framework/qb-target)
 Note: Supports QBCore and ESX. You can easily add support for other frameworks by editing the Framework.lua
  
 # Features
