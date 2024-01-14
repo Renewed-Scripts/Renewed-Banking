@@ -153,6 +153,7 @@ function DeletePeds()
         end
         peds[x] = {}
     end
+    pedSpawned = false
 end
 
 AddEventHandler('onResourceStop', function(resource)
