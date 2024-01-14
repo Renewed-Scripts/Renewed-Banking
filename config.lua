@@ -1,9 +1,12 @@
 lib.locale()
 Config = {
-    framework = 'qb', -- QB and ESX preconfigured edit the framework.lua to add functionality to other frameworks
-    renewedMultiJob = false, -- QBCORE ONLY! https://github.com/Renewed-Scripts/qb-phone  
-    progressbar = 'circle', -- circle or rectangle (Anything other than circle will default to rectangle)
-    currency ='USD', -- USD, EUR, GBP ect.....
+    framework = 'qb',              -- QB and ESX preconfigured edit the framework.lua to add functionality to other frameworks
+    updateGroupsInDatabase = true, -- QBCORE Only [TODO: ESX] - This will manually add any groups (Jobs/Gangs) that don't exist in the database but are authorised via the `authbank` variable.
+    removeOldGroupsInDB = false,   -- QBCORE Only [TODO: ESX] - This will remove any groups (Jobs/Gangs) in the database that aren't authorised to use bank accounts via `authBank`
+    debugGroupChanges = false,     -- QBCORE Only [TODO: ESX] - Will display any updates in the console if there are updates to made to the database.
+    renewedMultiJob = true,        -- QBCORE ONLY! https://github.com/Renewed-Scripts/qb-phone
+    progressbar = 'circle',        -- circle or rectangle (Anything other than circle will default to rectangle)
+    currency = 'USD',              -- USD, EUR, GBP ect.....
     atms = {
         `prop_atm_01`,
         `prop_atm_02`,
