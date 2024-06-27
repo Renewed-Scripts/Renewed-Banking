@@ -6,7 +6,7 @@ CreateThread(function()
     if Framework == 'Unknown' then
         StopResource(GetCurrentResourceName())
     end
-    if Framework == 'qb'then
+    if Framework == 'qb' then
         QBCore = exports['qb-core']:GetCoreObject()
         Jobs = QBCore.Shared.Jobs
         Gangs = QBCore.Shared.Gangs
@@ -18,7 +18,92 @@ CreateThread(function()
         ExportHandler("qb-management", "AddGangMoney", AddAccountMoney)
         ExportHandler("qb-management", "RemoveMoney", RemoveAccountMoney)
         ExportHandler("qb-management", "RemoveGangMoney", RemoveAccountMoney)
-    elseif Framework == 'esx'then
+
+        if Config.updateGroupsInDatabase then
+            local currentGroupList = {}
+            local groupData        = {}
+            local groupDataDB      = {}
+
+            MySQL.query('SELECT * FROM `bank_accounts_new` WHERE `creator` IS NULL', {},
+                function(response)
+                    -- Transcode SQL query results into a table, with the index being the group name
+                    for _, v in pairs(response) do
+                        if v.creator == nil then
+                            groupDataDB[v.id] = true
+                            table.insert(currentGroupList, v.id)
+                        end
+                    end
+
+                    -- Iterate through the Jobs table provided by QBCore to check they have `bankAuth` and transcoding them into a general table for checking if they need to be added to Database
+                    for job, data in pairs(Jobs) do
+                        for _, v in pairs(data.grades) do
+                            if v.bankAuth then
+                                groupData[job] = true
+                            end
+                        end
+                    end
+
+                    -- Iterate through the Gangs table provided by QBCore to check they have `bankAuth` and transcoding them into a general table for checking if they need to be added to Database
+                    for gang, data in pairs(Gangs) do
+                        for _, v in pairs(data.grades) do
+                            if v.bankAuth then
+                                groupData[gang] = true
+                            end
+                        end
+                    end
+
+                    -- Iterate through the groups table (Jobs & Gangs) that we transcoded from QBCore earlier and completing a diff check on the the groups currently in the Database.
+                    local newGroupsList  = {}
+                    local newGroupsToAdd = {}
+                    for group, _ in pairs(groupData) do
+                        if groupDataDB[group] == nil then
+                            table.insert(newGroupsToAdd, { "INSERT INTO `bank_accounts_new` (id) VALUES (?)", { group } })
+                            table.insert(newGroupsList, group)
+                        end
+                    end
+
+                    -- Execute SQL queries for adding the groups.
+                    if #newGroupsToAdd > 0 then
+                        MySQL.transaction.await(newGroupsToAdd)
+                    end
+
+                    -- Iterate through the groups table (Jobs & Gangs) that we transcoded from QBCore earlier and completing a diff check on the the groups currently in the Database.
+                    local oldGroupsList     = {}
+                    local oldGroupsToRemove = {}
+                    if Config.removeOldGroupsInDB then
+                        for group, _ in pairs(groupDataDB) do
+                            if groupData[group] == nil then
+                                table.insert(oldGroupsToRemove,
+                                    { "DELETE FROM `bank_accounts_new` WHERE (id) = (?)", { group } })
+                                table.insert(oldGroupsList, group)
+                            else
+                                groupData[group] = nil
+                            end
+                        end
+                        -- Execute SQL queries for deletion of the groups.
+                        if #oldGroupsToRemove > 0 then
+                            MySQL.transaction.await(oldGroupsToRemove)
+                        end
+                    end
+
+                    -- If we have debugMessages enabled and there are changes.. print them to the console
+                    if Config.debugGroupChanges then
+                        if #currentGroupList > 0 and (#newGroupsToAdd > 0 or #oldGroupsToRemove > 0) then
+                            PrintServerConsoleMessage("Groups in DB", currentGroupList)
+                        end
+                        if #newGroupsToAdd > 0 then
+                            PrintServerConsoleMessage("Groups to Add", newGroupsList)
+                        end
+                        if Config.removeOldGroupsInDB then
+                            if #oldGroupsToRemove > 0 then
+                                PrintServerConsoleMessage("Groups to Del", oldGroupsList)
+                            end
+                        end
+                    end
+                end
+            )
+        end
+    elseif Framework == 'esx' then
         ESX = exports['es_extended']:getSharedObject()
         ESX.RefreshJobs()
         Jobs = ESX.GetJobs()
@@ -88,6 +173,13 @@ function GetFunds(Player)
     end
 end
 
+function PrintServerConsoleMessage(string, data)
+    print("")
+    print("------------ " .. string .. " ------------")
+    QBCore.Debug(data)
+    print("---------------------------------------")
+end
+
 function AddMoney(Player, Amount, Type, comment)
     if Framework == 'qb' then
         Player.Functions.AddMoney(Type, Amount, comment)
@@ -130,8 +222,8 @@ function GetJobs(Player)
         if Config.renewedMultiJob then
             local jobs = exports['qb-phone']:getJobs(Player.PlayerData.citizenid)
             local temp = {}
-            for k,v in pairs(jobs) do
-                temp[#temp+1] = {
+            for k, v in pairs(jobs) do
+                temp[#temp + 1] = {
                     name = k,
                     grade = tostring(v.grade)
                 }
@@ -199,23 +291,23 @@ end)
 
 RegisterNetEvent('esx:onPlayerDeath')
 AddEventHandler('esx:onPlayerDeath', function()
-	deadPlayers[source] = true
+    deadPlayers[source] = true
 end)
 
 RegisterNetEvent('esx:onPlayerSpawn')
 AddEventHandler('esx:onPlayerSpawn', function()
     local Player = GetPlayerObject(source)
     local cid = GetIdentifier(Player)
-	if deadPlayers[source] then
-		deadPlayers[source] = nil
-	end
+    if deadPlayers[source] then
+        deadPlayers[source] = nil
+    end
     UpdatePlayerAccount(cid)
 end)
 
 AddEventHandler('esx:playerDropped', function(playerId, reason)
-	if deadPlayers[playerId] then
-		deadPlayers[playerId] = nil
-	end
+    if deadPlayers[playerId] then
+        deadPlayers[playerId] = nil
+    end
 end)
 
 
