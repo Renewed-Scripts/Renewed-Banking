@@ -87,7 +87,6 @@ CreateThread(function ()
 end)
 
 local pedSpawned = false
-local peds = {basic = {}, adv ={}}
 local blips = {}
 function CreatePeds()
     if pedSpawned then return end
@@ -111,7 +110,7 @@ function CreatePeds()
             SetEntityInvincible(self.ped, true)
             SetBlockingOfNonTemporaryEvents(self.ped, true)
 
-            local targetOpts = {}
+            local targetOpts
             if self.advanced then
                 targetOpts = {{
                     name = 'renewed_banking_accountmng',
