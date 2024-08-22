@@ -33,7 +33,7 @@ CreateThread(function()
         cachedAccounts[job] = {
             id = job,
             type = locale("org"),
-            name = job,
+            name = GetSocietyLabel(job),
             frozen = 0,
             amount = 0,
             transactions = {},
@@ -50,7 +50,7 @@ CreateThread(function()
         cachedAccounts[gang] = {
             id = gang,
             type = locale("gang"),
-            name = gang,
+            name = GetSocietyLabel(gang),
             frozen = 0,
             amount = 0,
             transactions = {},
