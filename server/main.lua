@@ -28,7 +28,8 @@ CreateThread(function()
             end
         end
     end)
-    for job in pairs(Jobs) do
+    local jobs, gangs = GetFrameworkGroups()
+    for job in pairs(jobs) do
         if cachedAccounts[job] then goto skipjob end
         cachedAccounts[job] = {
             id = job,
@@ -41,11 +42,11 @@ CreateThread(function()
             creator = nil
         }
         MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, NULL) ",{
-            job, cachedAccounts[job].amount, json.encode(cachedAccounts[job].transactions), json.encode({job}), cachedAccounts[job].frozen
+            job, cachedAccounts[job].amount, json.encode(cachedAccounts[job].transactions), json.encode({}), cachedAccounts[job].frozen
         })
         ::skipjob::
     end
-    for gang in pairs(Gangs) do
+    for gang in pairs(gangs) do
         if cachedAccounts[gang] then goto skipgang end
         cachedAccounts[gang] = {
             id = gang,
@@ -58,7 +59,7 @@ CreateThread(function()
             creator = nil
         }
         MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, NULL) ",{
-            gang, cachedAccounts[gang].amount, json.encode(cachedAccounts[gang].transactions), json.encode({gang}), cachedAccounts[gang].frozen
+            gang, cachedAccounts[gang].amount, json.encode(cachedAccounts[gang].transactions), json.encode({}), cachedAccounts[gang].frozen
         })
         ::skipgang::
     end

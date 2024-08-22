@@ -208,6 +208,10 @@ function IsDead(Player)
     end
 end
 
+function GetFrameworkGroups()
+    return Jobs, Gangs
+end
+
 --Misc Framework Events
 
 AddEventHandler('QBCore:Server:PlayerLoaded', function(Player)
