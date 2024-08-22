@@ -1,9 +1,11 @@
 local Framework = Config.framework
-QBCore, ESX, FullyLoaded = nil, nil, nil
-if Framework == 'qb'then
-	QBCore = exports['qb-core']:GetCoreObject()
+QBCore, ESX, FullyLoaded = nil, nil, nil --luacheck: ignore
+if Framework == 'qb' then
+	QBCore = exports['qb-core']:GetCoreObject() --luacheck: ignore
     FullyLoaded = Framework == 'qb' and LocalPlayer.state.isLoggedIn
-elseif Framework == 'esx'then
+elseif Framework == 'qbx' then
+    FullyLoaded = Framework == 'qbx' and LocalPlayer.state.isLoggedIn
+elseif Framework == 'esx' then
     ESX = exports['es_extended']:getSharedObject()
     FullyLoaded = Framework == 'esx' and ESX.PlayerLoaded or false
 else

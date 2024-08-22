@@ -28,6 +28,40 @@ CreateThread(function()
             end
         end
     end)
+    for job in pairs(Jobs) do
+        if cachedAccounts[job] then goto skipjob end
+        cachedAccounts[job] = {
+            id = job,
+            type = locale("org"),
+            name = job,
+            frozen = 0,
+            amount = 0,
+            transactions = {},
+            auth = {},
+            creator = nil
+        }
+        MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, NULL) ",{
+            job, cachedAccounts[job].amount, json.encode(cachedAccounts[job].transactions), json.encode({job}), cachedAccounts[job].frozen
+        })
+        ::skipjob::
+    end
+    for gang in pairs(Gangs) do
+        if cachedAccounts[gang] then goto skipgang end
+        cachedAccounts[gang] = {
+            id = gang,
+            type = locale("gang"),
+            name = gang,
+            frozen = 0,
+            amount = 0,
+            transactions = {},
+            auth = {},
+            creator = nil
+        }
+        MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, NULL) ",{
+            gang, cachedAccounts[gang].amount, json.encode(cachedAccounts[gang].transactions), json.encode({gang}), cachedAccounts[gang].frozen
+        })
+        ::skipgang::
+    end
 end)
 
 function UpdatePlayerAccount(cid)
@@ -299,9 +333,9 @@ lib.callback.register('Renewed-Banking:server:transfer', function(source, data)
             local canTransfer = RemoveAccountMoney(data.fromAccount, amount)
             if canTransfer then
                 AddMoney(Player2, amount, 'bank', data.comment)
-                local name = GetCharacterName(Player2)
-                local transaction = handleTransaction(data.fromAccount, ("%s / %s"):format(cachedAccounts[data.fromAccount].name, data.fromAccount), amount, data.comment, cachedAccounts[data.fromAccount].name, name, "withdraw")
-                handleTransaction(data.stateid, ("%s / %s"):format(cachedAccounts[data.fromAccount].name, data.fromAccount), amount, data.comment, cachedAccounts[data.fromAccount].name, name, "deposit", transaction.trans_id)
+                local plyName = GetCharacterName(Player2)
+                local transaction = handleTransaction(data.fromAccount, ("%s / %s"):format(cachedAccounts[data.fromAccount].name, data.fromAccount), amount, data.comment, cachedAccounts[data.fromAccount].name, plyName, "withdraw")
+                handleTransaction(data.stateid, ("%s / %s"):format(cachedAccounts[data.fromAccount].name, data.fromAccount), amount, data.comment, cachedAccounts[data.fromAccount].name, plyName, "deposit", transaction.trans_id)
             else
                 TriggerClientEvent('Renewed-Banking:client:sendNotification', source, locale("not_enough_money"))
                 return false
