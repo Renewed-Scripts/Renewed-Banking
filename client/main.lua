@@ -95,9 +95,27 @@ function CreatePeds()
         local pedPoint = lib.points.new({
             coords = coords,
             distance = 300,
-            advanced = Config.peds[k].createAccounts,
             model = joaat(Config.peds[k].model),
-            ped = 0
+            ped = nil,
+            targetOptions = Config.peds[k].createAccounts and {{
+                name = 'renewed_banking_accountmng',
+                event = 'Renewed-Banking:client:accountManagmentMenu',
+                icon = 'fas fa-money-check',
+                label = locale('manage_bank'),
+                atm = false,
+                canInteract = function(_, distance)
+                    return distance < 4.5
+                end
+            }} or {{
+                name = 'renewed_banking_openui',
+                event = 'Renewed-Banking:client:openBankUI',
+                icon = 'fas fa-money-check',
+                label = locale('view_bank'),
+                atm = false,
+                canInteract = function(_, distance)
+                    return distance < 4.5
+                end
+            }}
         })
 
         function pedPoint:onEnter()
@@ -109,37 +127,15 @@ function CreatePeds()
             FreezeEntityPosition(self.ped, true)
             SetEntityInvincible(self.ped, true)
             SetBlockingOfNonTemporaryEvents(self.ped, true)
-
-            local targetOpts
-            if self.advanced then
-                targetOpts = {{
-                    name = 'renewed_banking_accountmng',
-                    event = 'Renewed-Banking:client:accountManagmentMenu',
-                    icon = 'fas fa-money-check',
-                    label = locale('manage_bank'),
-                    atm = false,
-                    canInteract = function(_, distance)
-                        return distance < 4.5
-                    end
-                }}
-            else
-                targetOpts = {{
-                    name = 'renewed_banking_openui',
-                    event = 'Renewed-Banking:client:openBankUI',
-                    icon = 'fas fa-money-check',
-                    label = locale('view_bank'),
-                    atm = false,
-                    canInteract = function(_, distance)
-                        return distance < 4.5
-                    end
-                }}
-            end
-            exports.ox_target:addLocalEntity(self.ped, targetOpts)
+            exports.ox_target:addLocalEntity(self.ped, self.targetOptions)
         end
 
         function pedPoint:onExit()
             exports.ox_target:removeLocalEntity(self.ped, self.advanced and 'renewed_banking_accountmng' or 'renewed_banking_openui')
-            DeletePed(self.ped)
+            if DoesEntityExist(self.ped) then
+                DeletePed(self.ped)
+            end
+            self.ped = nil
         end
 
         blips[k] = AddBlipForCoord(coords.x, coords.y, coords.z-1)
@@ -159,6 +155,9 @@ function DeletePeds()
     if not pedSpawned then return end
     local points = lib.points.getAllPoints()
     for i = 1, #points do
+        if DoesEntityExist(points[i].ped) then
+            DeletePed(points[i].ped)
+        end
         points[i]:remove()
     end
     for i = 1, #blips do
