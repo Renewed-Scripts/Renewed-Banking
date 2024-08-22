@@ -29,12 +29,11 @@ CreateThread(function()
         end
     end)
     local jobs, gangs = GetFrameworkGroups()
-    for job in pairs(jobs) do
-        if cachedAccounts[job] then goto skipjob end
-        cachedAccounts[job] = {
-            id = job,
-            type = locale("org"),
-            name = GetSocietyLabel(job),
+    local function addCachedAccount(group)
+        cachedAccounts[group] = {
+            id = group,
+            type = locale('org'),
+            name = GetSocietyLabel(group),
             frozen = 0,
             amount = 0,
             transactions = {},
@@ -42,26 +41,18 @@ CreateThread(function()
             creator = nil
         }
         MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, NULL) ",{
-            job, cachedAccounts[job].amount, json.encode(cachedAccounts[job].transactions), json.encode({}), cachedAccounts[job].frozen
+            group, cachedAccounts[group].amount, json.encode(cachedAccounts[group].transactions), json.encode({}), cachedAccounts[group].frozen
         })
-        ::skipjob::
+    end
+    for job in pairs(jobs) do
+        if not cachedAccounts[job] then
+            addCachedAccount(job)
+        end
     end
     for gang in pairs(gangs) do
-        if cachedAccounts[gang] then goto skipgang end
-        cachedAccounts[gang] = {
-            id = gang,
-            type = locale("gang"),
-            name = GetSocietyLabel(gang),
-            frozen = 0,
-            amount = 0,
-            transactions = {},
-            auth = {},
-            creator = nil
-        }
-        MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, NULL) ",{
-            gang, cachedAccounts[gang].amount, json.encode(cachedAccounts[gang].transactions), json.encode({}), cachedAccounts[gang].frozen
-        })
-        ::skipgang::
+        if not cachedAccounts[gang] then
+            addCachedAccount(gang)
+        end
     end
 end)
 
