@@ -153,29 +153,6 @@ function CreatePeds()
         AddTextComponentString('Bank')
         EndTextCommandSetBlipName(blips[k])
     end
-
-    local targetOpts ={{
-        name = 'renewed_banking_openui',
-        event = 'Renewed-Banking:client:openBankUI',
-        icon = 'fas fa-money-check',
-        label = locale('view_bank'),
-        atm = false,
-        canInteract = function(_, distance)
-            return distance < 4.5
-        end
-    }}
-    exports.ox_target:addLocalEntity(peds.basic, targetOpts)
-    targetOpts[#targetOpts+1]={
-        name = 'renewed_banking_accountmng',
-        event = 'Renewed-Banking:client:accountManagmentMenu',
-        icon = 'fas fa-money-check',
-        label = locale('manage_bank'),
-        atm = false,
-        canInteract = function(_, distance)
-            return distance < 4.5
-        end
-    }
-    exports.ox_target:addLocalEntity(peds.adv, targetOpts)
     pedSpawned = true
 end
 
