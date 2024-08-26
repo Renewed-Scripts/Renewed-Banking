@@ -122,6 +122,7 @@ function CreatePeds()
             lib.requestModel(self.model, 10000)
 
             self.ped = CreatePed(0, self.model, self.coords.x, self.coords.y, self.coords.z-1, self.coords.w, false, false)
+            SetModelAsNoLongerNeeded(self.model)
 
             TaskStartScenarioInPlace(self.ped, 'PROP_HUMAN_STAND_IMPATIENT', 0, true)
             FreezeEntityPosition(self.ped, true)
