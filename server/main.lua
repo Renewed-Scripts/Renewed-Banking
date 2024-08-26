@@ -28,6 +28,32 @@ CreateThread(function()
             end
         end
     end)
+    local jobs, gangs = GetFrameworkGroups()
+    local function addCachedAccount(group)
+        cachedAccounts[group] = {
+            id = group,
+            type = locale('org'),
+            name = GetSocietyLabel(group),
+            frozen = 0,
+            amount = 0,
+            transactions = {},
+            auth = {},
+            creator = nil
+        }
+        MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, NULL) ",{
+            group, cachedAccounts[group].amount, json.encode(cachedAccounts[group].transactions), json.encode({}), cachedAccounts[group].frozen
+        })
+    end
+    for job in pairs(jobs) do
+        if not cachedAccounts[job] then
+            addCachedAccount(job)
+        end
+    end
+    for gang in pairs(gangs) do
+        if not cachedAccounts[gang] then
+            addCachedAccount(gang)
+        end
+    end
 end)
 
 function UpdatePlayerAccount(cid)
@@ -299,9 +325,9 @@ lib.callback.register('Renewed-Banking:server:transfer', function(source, data)
             local canTransfer = RemoveAccountMoney(data.fromAccount, amount)
             if canTransfer then
                 AddMoney(Player2, amount, 'bank', data.comment)
-                local name = GetCharacterName(Player2)
-                local transaction = handleTransaction(data.fromAccount, ("%s / %s"):format(cachedAccounts[data.fromAccount].name, data.fromAccount), amount, data.comment, cachedAccounts[data.fromAccount].name, name, "withdraw")
-                handleTransaction(data.stateid, ("%s / %s"):format(cachedAccounts[data.fromAccount].name, data.fromAccount), amount, data.comment, cachedAccounts[data.fromAccount].name, name, "deposit", transaction.trans_id)
+                local plyName = GetCharacterName(Player2)
+                local transaction = handleTransaction(data.fromAccount, ("%s / %s"):format(cachedAccounts[data.fromAccount].name, data.fromAccount), amount, data.comment, cachedAccounts[data.fromAccount].name, plyName, "withdraw")
+                handleTransaction(data.stateid, ("%s / %s"):format(cachedAccounts[data.fromAccount].name, data.fromAccount), amount, data.comment, cachedAccounts[data.fromAccount].name, plyName, "deposit", transaction.trans_id)
             else
                 TriggerClientEvent('Renewed-Banking:client:sendNotification', source, locale("not_enough_money"))
                 return false

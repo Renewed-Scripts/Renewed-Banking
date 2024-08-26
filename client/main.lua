@@ -87,24 +87,57 @@ CreateThread(function ()
 end)
 
 local pedSpawned = false
-local peds = {basic = {}, adv ={}}
 local blips = {}
 function CreatePeds()
     if pedSpawned then return end
-    for k=1, #Config.peds do
-        local model = joaat(Config.peds[k].model)
-
-        RequestModel(model)
-        while not HasModelLoaded(model) do Wait(0) end
-
+    for k = 1, #Config.peds do
         local coords = Config.peds[k].coords
-        local bankPed = CreatePed(0, model, coords.x, coords.y, coords.z-1, coords.w, false, false)
+        local pedPoint = lib.points.new({
+            coords = coords,
+            distance = 300,
+            model = joaat(Config.peds[k].model),
+            ped = nil,
+            targetOptions = Config.peds[k].createAccounts and {{
+                name = 'renewed_banking_accountmng',
+                event = 'Renewed-Banking:client:accountManagmentMenu',
+                icon = 'fas fa-money-check',
+                label = locale('manage_bank'),
+                atm = false,
+                canInteract = function(_, distance)
+                    return distance < 4.5
+                end
+            }} or {{
+                name = 'renewed_banking_openui',
+                event = 'Renewed-Banking:client:openBankUI',
+                icon = 'fas fa-money-check',
+                label = locale('view_bank'),
+                atm = false,
+                canInteract = function(_, distance)
+                    return distance < 4.5
+                end
+            }}
+        })
 
-        TaskStartScenarioInPlace(bankPed, 'PROP_HUMAN_STAND_IMPATIENT', 0, true)
-        FreezeEntityPosition(bankPed, true)
-        SetEntityInvincible(bankPed, true)
-        SetBlockingOfNonTemporaryEvents(bankPed, true)
-        table.insert(Config.peds[k].createAccounts and peds.adv or peds.basic, bankPed)
+        function pedPoint:onEnter()
+            lib.requestModel(self.model, 10000)
+
+            self.ped = CreatePed(0, self.model, self.coords.x, self.coords.y, self.coords.z-1, self.coords.w, false, false)
+            SetModelAsNoLongerNeeded(self.model)
+
+            TaskStartScenarioInPlace(self.ped, 'PROP_HUMAN_STAND_IMPATIENT', 0, true)
+            FreezeEntityPosition(self.ped, true)
+            SetEntityInvincible(self.ped, true)
+            SetBlockingOfNonTemporaryEvents(self.ped, true)
+            exports.ox_target:addLocalEntity(self.ped, self.targetOptions)
+        end
+
+        function pedPoint:onExit()
+            exports.ox_target:removeLocalEntity(self.ped, self.advanced and 'renewed_banking_accountmng' or 'renewed_banking_openui')
+            if DoesEntityExist(self.ped) then
+                DeletePed(self.ped)
+            end
+            self.ped = nil
+        end
 
         blips[k] = AddBlipForCoord(coords.x, coords.y, coords.z-1)
         SetBlipSprite(blips[k], 108)
@@ -116,42 +149,20 @@ function CreatePeds()
         AddTextComponentString('Bank')
         EndTextCommandSetBlipName(blips[k])
     end
-
-    local targetOpts ={{
-        name = 'renewed_banking_openui',
-        event = 'Renewed-Banking:client:openBankUI',
-        icon = 'fas fa-money-check',
-        label = locale('view_bank'),
-        atm = false,
-        canInteract = function(_, distance)
-            return distance < 4.5
-        end
-    }}
-    exports.ox_target:addLocalEntity(peds.basic, targetOpts)
-    targetOpts[#targetOpts+1]={
-        name = 'renewed_banking_accountmng',
-        event = 'Renewed-Banking:client:accountManagmentMenu',
-        icon = 'fas fa-money-check',
-        label = locale('manage_bank'),
-        atm = false,
-        canInteract = function(_, distance)
-            return distance < 4.5
-        end
-    }
-    exports.ox_target:addLocalEntity(peds.adv, targetOpts)
     pedSpawned = true
 end
 
 function DeletePeds()
     if not pedSpawned then return end
-    local k=1
-    for x,v in pairs(peds)do
-        for i=1, #v do
-            DeletePed(v[i])
-            RemoveBlip(blips[k])
-            k += 1
+    local points = lib.points.getAllPoints()
+    for i = 1, #points do
+        if DoesEntityExist(points[i].ped) then
+            DeletePed(points[i].ped)
         end
-        peds[x] = {}
+        points[i]:remove()
+    end
+    for i = 1, #blips do
+        RemoveBlip(blips[i])
     end
     pedSpawned = false
 end
@@ -159,8 +170,6 @@ end
 AddEventHandler('onResourceStop', function(resource)
     if resource ~= GetCurrentResourceName() then return end
     exports.ox_target:removeModel(Config.atms, {'renewed_banking_openui'})
-    exports.ox_target:removeEntity(peds.basic, {'renewed_banking_openui'})
-    exports.ox_target:removeEntity(peds.adv, {'renewed_banking_openui','renewed_banking_accountmng'})
     DeletePeds()
 end)
 

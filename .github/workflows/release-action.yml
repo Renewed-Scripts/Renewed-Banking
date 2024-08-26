@@ -1,0 +1,63 @@
+name: "Release Action"
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+ BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+
+jobs:
+    release-action:
+        name: "Create Release"
+        runs-on: "ubuntu-latest"
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+                ref: ${{ env.BRANCH_NAME }}
+
+            - name: Install ZIP
+              run: sudo apt install zip
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4.0.0
+              with:
+                version: 9
+
+            - name: Setup node
+              uses: actions/setup-node@v4
+              with:
+                node-version: 20.x
+                cache: "pnpm"
+                cache-dependency-path: "web/pnpm-lock.yaml"
+      
+            - name: Install dependencies
+              run: pnpm i --frozen-lockfile
+              working-directory: web
+      
+            - name: Run build
+              run: pnpm build
+              working-directory: web
+              env:
+                CI: false
+      
+            - name: Bundle files
+              run: |
+                shopt -s extglob
+                mkdir -p ./temp/${{ github.event.repository.name }}
+                mkdir -p ./temp/${{ github.event.repository.name }}/web
+                cp ./{README.md,LICENSE,fxmanifest.lua} ./temp/${{ github.event.repository.name }}
+                cp -r ./{client,config,server} ./temp/${{ github.event.repository.name }}
+                cp -r ./web/public ./temp/${{ github.event.repository.name }}/web/public
+                cd ./temp && zip -r ../${{ github.event.repository.name }}.zip ./${{ github.event.repository.name }}
+
+            - name: Create Release
+              uses: marvinpinto/action-automatic-releases@latest
+              with:
+                title: ${{ github.ref_name }}
+                repo_token: "${{ secrets.GITHUB_TOKEN }}"
+                prerelease: false
+                files: ${{ github.event.repository.name }}.zip
