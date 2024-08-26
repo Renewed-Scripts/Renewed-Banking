@@ -18,7 +18,7 @@
     });
 </script>
 
-<section class="account" on:click={()=>handleAccountClick(account.id)}>
+<section class="account" on:click={()=>handleAccountClick(account.id)} on:keydown={()=>{}}>
     <h4>
         {account.type}{$translations.account}/ {account.id}
     </h4>
