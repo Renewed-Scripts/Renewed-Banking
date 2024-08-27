@@ -7,7 +7,8 @@ CreateThread(function()
         error(locale("ui_not_built"))
         return StopResource("Renewed-Banking")
     end
-    MySQL.query('SELECT * FROM bank_accounts_new', {}, function(accounts)
+    local accounts = MySQL.query.await('SELECT * FROM bank_accounts_new', {})
+    if accounts then
         for _,v in pairs (accounts) do
             local job = v.id
             v.auth = json.decode(v.auth)
@@ -27,7 +28,7 @@ CreateThread(function()
                 end
             end
         end
-    end)
+    end
     local jobs, gangs = GetFrameworkGroups()
     local function addCachedAccount(group)
         cachedAccounts[group] = {
