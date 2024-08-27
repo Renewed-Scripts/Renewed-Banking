@@ -1,63 +1,78 @@
 name: "Release Action"
 
 on:
-  push:
-    tags:
-      - "v*"
-
-env:
- BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+  workflow_run:
+    workflows: [Create New Release]
+    types:
+      - completed
 
 jobs:
-    release-action:
-        name: "Create Release"
-        runs-on: "ubuntu-latest"
-        steps:
-            - name: Checkout Repository
-              uses: actions/checkout@v4
-              with:
-                fetch-depth: 0
-                ref: ${{ env.BRANCH_NAME }}
+  release-action:
+      name: "Create Release"
+      runs-on: "ubuntu-latest"
+      steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.repository.default_branch }}
 
-            - name: Install ZIP
-              run: sudo apt install zip
+      - name: Get the latest tag
+        id: get_tag
+        run: |
+          echo "LATEST_TAG=$(git tag --sort=-creatordate | head -n 1)" >> $GITHUB_ENV
 
-            - name: Install pnpm
-              uses: pnpm/action-setup@v4.0.0
-              with:
-                version: 9
+      - name: Install ZIP
+        run: sudo apt install zip
 
-            - name: Setup node
-              uses: actions/setup-node@v4
-              with:
-                node-version: 20.x
-                cache: "pnpm"
-                cache-dependency-path: "web/pnpm-lock.yaml"
-      
-            - name: Install dependencies
-              run: pnpm i --frozen-lockfile
-              working-directory: web
-      
-            - name: Run build
-              run: pnpm build
-              working-directory: web
-              env:
-                CI: false
-      
-            - name: Bundle files
-              run: |
-                shopt -s extglob
-                mkdir -p ./temp/${{ github.event.repository.name }}
-                mkdir -p ./temp/${{ github.event.repository.name }}/web
-                cp ./{README.md,LICENSE,fxmanifest.lua} ./temp/${{ github.event.repository.name }}
-                cp -r ./{client,config,server} ./temp/${{ github.event.repository.name }}
-                cp -r ./web/public ./temp/${{ github.event.repository.name }}/web/public
-                cd ./temp && zip -r ../${{ github.event.repository.name }}.zip ./${{ github.event.repository.name }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4.0.0
+        with:
+          version: 9
 
-            - name: Create Release
-              uses: marvinpinto/action-automatic-releases@latest
-              with:
-                title: ${{ github.ref_name }}
-                repo_token: "${{ secrets.GITHUB_TOKEN }}"
-                prerelease: false
-                files: ${{ github.event.repository.name }}.zip
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: "pnpm"
+          cache-dependency-path: "web/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        run: pnpm i --frozen-lockfile
+        working-directory: web
+
+      - name: Run build
+        run: pnpm build
+        working-directory: web
+        env:
+          CI: false
+
+      - name: Bundle files
+        run: |
+          shopt -s extglob
+          mkdir -p ./temp/${{ github.event.repository.name }}
+          mkdir -p ./temp/${{ github.event.repository.name }}/web
+          cp ./{README.md,LICENSE,config.lua,fxmanifest.lua} ./temp/${{ github.event.repository.name }}
+          cp -r ./{client,locales,server} ./temp/${{ github.event.repository.name }}
+          cp -r ./web/public ./temp/${{ github.event.repository.name }}/web/public
+          cd ./temp && zip -r ../${{ github.event.repository.name }}.zip ./${{ github.event.repository.name }}
+
+      - name: Update CHANGELOG
+        id: changelog
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.LATEST_TAG }}
+          writeToFile: false
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          allowUpdates: true
+          draft: false
+          makeLatest: true
+          name: ${{ env.LATEST_TAG }}
+          tag: ${{ env.LATEST_TAG }}
+          body: ${{ steps.changelog.outputs.changes }}
+          artifacts: ${{ github.event.repository.name }}.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
