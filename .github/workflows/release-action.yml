@@ -52,7 +52,7 @@ jobs:
           shopt -s extglob
           mkdir -p ./temp/${{ github.event.repository.name }}
           mkdir -p ./temp/${{ github.event.repository.name }}/web
-          cp ./{README.md,LICENSE,config.lua,fxmanifest.lua} ./temp/${{ github.event.repository.name }}
+          cp ./{README.md,LICENSE,config.lua,fxmanifest.lua,Renewed-Banking.sql} ./temp/${{ github.event.repository.name }}
           cp -r ./{client,locales,server} ./temp/${{ github.event.repository.name }}
           cp -r ./web/public ./temp/${{ github.event.repository.name }}/web/public
           cd ./temp && zip -r ../${{ github.event.repository.name }}.zip ./${{ github.event.repository.name }}
