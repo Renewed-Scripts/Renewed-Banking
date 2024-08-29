@@ -30,6 +30,7 @@ CreateThread(function()
         end
     end
     local jobs, gangs = GetFrameworkGroups()
+    local query = {}
     local function addCachedAccount(group)
         cachedAccounts[group] = {
             id = group,
@@ -41,9 +42,8 @@ CreateThread(function()
             auth = {},
             creator = nil
         }
-        MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, NULL) ",{
-            group, cachedAccounts[group].amount, json.encode(cachedAccounts[group].transactions), json.encode({}), cachedAccounts[group].frozen
-        })
+        query[#query+1] = {"INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, NULL) ",
+        { group, cachedAccounts[group].amount, json.encode(cachedAccounts[group].transactions), json.encode({}), cachedAccounts[group].frozen }}
     end
     for job in pairs(jobs) do
         if not cachedAccounts[job] then
@@ -54,6 +54,9 @@ CreateThread(function()
         if not cachedAccounts[gang] then
             addCachedAccount(gang)
         end
+    end
+    if #query >= 1 then
+        MySQL.transaction.await(query)
     end
 end)
 
