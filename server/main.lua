@@ -670,7 +670,8 @@ MySQL.query.await([=[
     `creator` varchar(50) DEFAULT NULL,
     PRIMARY KEY (`id`)
     );
-
+]=])
+MySQL.query.await([=[
     CREATE TABLE IF NOT EXISTS `player_transactions` (
     `id` varchar(50) NOT NULL,
     `isFrozen` int(11) DEFAULT 0,
