@@ -30,6 +30,7 @@ CreateThread(function()
         end
     end
     local jobs, gangs = GetFrameworkGroups()
+    local query = {}
     local function addCachedAccount(group)
         cachedAccounts[group] = {
             id = group,
@@ -41,9 +42,8 @@ CreateThread(function()
             auth = {},
             creator = nil
         }
-        MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, NULL) ",{
-            group, cachedAccounts[group].amount, json.encode(cachedAccounts[group].transactions), json.encode({}), cachedAccounts[group].frozen
-        })
+        query[#query + 1] = {"INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, NULL) ",
+        { group, cachedAccounts[group].amount, json.encode(cachedAccounts[group].transactions), json.encode({}), cachedAccounts[group].frozen }}
     end
     for job in pairs(jobs) do
         if not cachedAccounts[job] then
@@ -54,6 +54,9 @@ CreateThread(function()
         if not cachedAccounts[gang] then
             addCachedAccount(gang)
         end
+    end
+    if #query >= 1 then
+        MySQL.transaction.await(query)
     end
 end)
 
@@ -660,21 +663,9 @@ function ExportHandler(resource, name, cb)
     end)
 end
 
-MySQL.query.await([=[
-    CREATE TABLE IF NOT EXISTS `bank_accounts_new` (
-    `id` varchar(50) NOT NULL,
-    `amount` int(11) DEFAULT 0,
-    `transactions` longtext DEFAULT '[]',
-    `auth` longtext DEFAULT '[]',
-    `isFrozen` int(11) DEFAULT 0,
-    `creator` varchar(50) DEFAULT NULL,
-    PRIMARY KEY (`id`)
-    );
+local createTables = {
+    { query = "CREATE TABLE IF NOT EXISTS `bank_accounts_new` (`id` varchar(50) NOT NULL, `amount` int(11) DEFAULT 0, `transactions` longtext DEFAULT '[]', `auth` longtext DEFAULT '[]', `isFrozen` int(11) DEFAULT 0, `creator` varchar(50) DEFAULT NULL, PRIMARY KEY (`id`));", values = nil },
+    { query = "CREATE TABLE IF NOT EXISTS `player_transactions` (`id` varchar(50) NOT NULL, `isFrozen` int(11) DEFAULT 0, `transactions` longtext DEFAULT '[]', PRIMARY KEY (`id`));", values = nil }
+}
 
-    CREATE TABLE IF NOT EXISTS `player_transactions` (
-    `id` varchar(50) NOT NULL,
-    `isFrozen` int(11) DEFAULT 0,
-    `transactions` longtext DEFAULT '[]',
-    PRIMARY KEY (`id`)
-    );
-]=])
+assert(MySQL.transaction.await(createTables), "Failed to create tables")
