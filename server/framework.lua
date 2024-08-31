@@ -119,7 +119,7 @@ function AddMoney(Player, Amount, Type, comment)
 end
 
 function RemoveMoney(Player, Amount, Type, comment)
-    if Framework == 'qb' and Framework == 'qbx' then
+    if Framework == 'qb' or Framework == 'qbx' then
         local currentAmount = Player.Functions.GetMoney(Type)
         if currentAmount >= Amount then
             Player.Functions.RemoveMoney(Type, Amount, comment)
