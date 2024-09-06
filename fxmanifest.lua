@@ -1,10 +1,10 @@
 fx_version 'cerulean'
 game 'gta5'
-version '2.1.2'
+version '2.1.3'
 
 description 'Renewed Banking'
 Author "uShifty#1733"
-version '2.1.2'
+version '2.1.3'
 
 lua54 'yes'
 
