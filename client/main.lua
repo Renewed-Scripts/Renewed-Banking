@@ -96,17 +96,18 @@ function CreatePeds()
             coords = coords,
             distance = 300,
             model = joaat(Config.peds[k].model),
+            heading = coords.w,
             ped = nil,
-            targetOptions = Config.peds[k].createAccounts and {{
+            targetOptions = {{
                 name = 'renewed_banking_accountmng',
                 event = 'Renewed-Banking:client:accountManagmentMenu',
                 icon = 'fas fa-money-check',
                 label = locale('manage_bank'),
                 atm = false,
                 canInteract = function(_, distance)
-                    return distance < 4.5
+                    return distance < 4.5 and Config.peds[k].createAccounts
                 end
-            }} or {{
+            },{
                 name = 'renewed_banking_openui',
                 event = 'Renewed-Banking:client:openBankUI',
                 icon = 'fas fa-money-check',
@@ -121,7 +122,8 @@ function CreatePeds()
         function pedPoint:onEnter()
             lib.requestModel(self.model, 10000)
 
-            self.ped = CreatePed(0, self.model, self.coords.x, self.coords.y, self.coords.z-1, self.coords.w, false, false)
+            self.ped = CreatePed(0, self.model, self.coords.x, self.coords.y, self.coords.z-1, self.heading, false, false)
+            SetEntityHeading(self.ped, self.heading)
             SetModelAsNoLongerNeeded(self.model)
 
             TaskStartScenarioInPlace(self.ped, 'PROP_HUMAN_STAND_IMPATIENT', 0, true)
