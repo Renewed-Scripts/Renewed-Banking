@@ -1,6 +1,7 @@
 lib.locale()
 Config = {
-    framework = 'qb', -- QB, QBX, and ESX preconfigured edit the framework.lua to add functionality to other frameworks
+    -- Framework automatically detected
+    -- QB, QBX, and ESX preconfigured edit the framework.lua to add functionality to other frameworks
     renewedMultiJob = false, -- QBCORE ONLY! https://github.com/Renewed-Scripts/qb-phone  
     progressbar = 'circle', -- circle or rectangle (Anything other than circle will default to rectangle)
     currency = 'USD', -- USD, EUR, GBP ect.....

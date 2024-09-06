@@ -1,4 +1,4 @@
-local Framework = Config.framework == 'qb' and 'qb' or Config.framework == 'qbx' and 'qbx' or Config.framework == 'esx' and 'esx' or 'Unknown'
+local Framework = GetResourceState('es_extended') == 'started' and 'esx' or GetResourceState('qbx_core') == 'started' and 'qbx' or GetResourceState('qb-core') == 'started' and 'qb' or 'Unknown'
 local QBCore, ESX, Jobs, Gangs = nil, nil, nil, nil
 local deadPlayers = {}
 
@@ -29,10 +29,11 @@ CreateThread(function()
         ExportHandler("qb-management", "AddGangMoney", AddAccountMoney)
         ExportHandler("qb-management", "RemoveMoney", RemoveAccountMoney)
         ExportHandler("qb-management", "RemoveGangMoney", RemoveAccountMoney)
-    elseif Framework == 'esx'then
+    elseif Framework == 'esx' then
         ESX = exports['es_extended']:getSharedObject()
         ESX.RefreshJobs()
         Jobs = ESX.GetJobs()
+        Gangs = {} -- ESX doesn't have gangs
 
         -- Backwards Compatability
         ExportHandler("esx_society", "GetSociety", GetAccountMoney)
