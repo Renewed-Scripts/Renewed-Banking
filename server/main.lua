@@ -556,6 +556,34 @@ RegisterNetEvent('Renewed-Banking:server:changeAccountName', function(account, n
     updateAccountName(account, newName, source)
 end) exports("changeAccountName", updateAccountName)-- Should only use this on very secure backends to avoid anyone using this as this is a server side ONLY export --
 
+local function CreateJobAccount(job, initialBalance)
+    -- job.name = job name/society name
+    -- job.label = job label/society label
+    -- initialBalance(int): (optional) amount for account to start with
+    if type(job) ~= 'table' or not job.name or not job.label then return end
+
+    -- check if account already exist?
+    if cachedAccounts[job.name] then return cachedAccounts[job.name] end
+
+    cachedAccounts[job.name] = {
+        id = job.name,
+        type = locale('org'),
+        name = job.label,
+        frozen = 0,
+        amount = initialBalance or 0,
+        transactions = {},
+        auth = {},
+        creator = nil
+    }
+
+    MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, NULL) ",{
+        job.name, cachedAccounts[job.name].amount, json.encode(cachedAccounts[job.name].transactions), json.encode({}), cachedAccounts[job.name].frozen
+    })
+
+    return cachedAccounts[job.name]
+end
+exports('CreateJobAccount', CreateJobAccount)
+
 local function addAccountMember(account, member)
     if not account or not member then return end
 
@@ -575,7 +603,8 @@ local function addAccountMember(account, member)
     cachedAccounts[account].auth[targetCID] = true
     MySQL.update('UPDATE bank_accounts_new SET auth = ? WHERE id = ?',{json.encode(auth), account})
 
-end exports("addAccountMember", addAccountMember)
+end
+exports("addAccountMember", addAccountMember)
 
 local function removeAccountMember(account, member)
     local Player2 = getPlayerData(false, member)
