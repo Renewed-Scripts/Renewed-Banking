@@ -4,6 +4,7 @@ Config = {
     -- QB, QBX, and ESX preconfigured edit the framework.lua to add functionality to other frameworks
     renewedMultiJob = false, -- QBCORE ONLY! https://github.com/Renewed-Scripts/qb-phone  
     progressbar = 'circle', -- circle or rectangle (Anything other than circle will default to rectangle)
+    transactionGetterLimit = 1000,
     currency = 'USD', -- USD, EUR, GBP ect.....
     atms = {
         `prop_atm_01`,

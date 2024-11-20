@@ -7,6 +7,18 @@ CreateThread(function()
         error(locale("ui_not_built"))
         return StopResource("Renewed-Banking")
     end
+
+    local tempTransactions = {}
+    local transactions = MySQL.query.await('SELECT * FROM banking_transactions ORDER BY time DESC LIMIT 0,' .. Config.transactionGetterLimit, {})
+    if transactions then
+        for _,v in pairs (transactions) do
+            if not tempTransactions[v.identifier] then
+                tempTransactions[v.identifier] = {}
+            end
+            table.insert(tempTransactions[v.identifier], v)
+        end
+    end
+
     local accounts = MySQL.query.await('SELECT * FROM bank_accounts_new', {})
     if accounts then
         for _,v in pairs (accounts) do
@@ -18,7 +30,7 @@ CreateThread(function()
                 name = GetSocietyLabel(job),
                 frozen = v.isFrozen == 1,
                 amount = v.amount,
-                transactions = json.decode(v.transactions),
+                transactions = tempTransactions[job] or {},
                 auth = {},
                 creator = v.creator
             }
@@ -42,8 +54,8 @@ CreateThread(function()
             auth = {},
             creator = nil
         }
-        query[#query + 1] = {"INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, NULL) ",
-        { group, cachedAccounts[group].amount, json.encode(cachedAccounts[group].transactions), json.encode({}), cachedAccounts[group].frozen }}
+        query[#query + 1] = {"INSERT INTO bank_accounts_new (id, amount, auth, isFrozen, creator) VALUES (?, ?, ?, ?, NULL) ",
+        { group, cachedAccounts[group].amount, json.encode({}), cachedAccounts[group].frozen }}
     end
     for job in pairs(jobs) do
         if not cachedAccounts[job] then
@@ -62,12 +74,12 @@ end)
 
 function UpdatePlayerAccount(cid)
     local p = promise.new()
-    MySQL.query('SELECT * FROM player_transactions WHERE id = ?', {cid}, function(account)
+    MySQL.query('SELECT * FROM banking_transactions WHERE identifier = ? ORDER BY time DESC LIMIT 0,' .. Config.transactionGetterLimit, {cid}, function(account)
         local query = '%' .. cid .. '%'
         MySQL.query("SELECT * FROM bank_accounts_new WHERE auth LIKE ? ", {query}, function(shared)
             cachedPlayers[cid] = {
                 isFrozen = 0,
-                transactions = #account > 0 and json.decode(account[1].transactions) or {},
+                transactions = #account > 0 and account or {},
                 accounts = {}
             }
 
@@ -174,15 +186,13 @@ local function handleTransaction(account, title, amount, message, issuer, receiv
     }
     if cachedAccounts[account] then
         table.insert(cachedAccounts[account].transactions, 1, transaction)
-        local transactions = json.encode(cachedAccounts[account].transactions)
-        MySQL.prepare("INSERT INTO bank_accounts_new (id, transactions) VALUES (?, ?) ON DUPLICATE KEY UPDATE transactions = ?",{
-            account, transactions, transactions
+        MySQL.prepare("INSERT INTO banking_transactions (identifier, trans_id, title, amount, trans_type, receiver, issuer, time, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",{
+            account, transaction.trans_id, transaction.title, transaction.amount, transaction.trans_type, transaction.receiver, transaction.issuer, transaction.time, transaction.message
         })
     elseif cachedPlayers[account] then
         table.insert(cachedPlayers[account].transactions, 1, transaction)
-        local transactions = json.encode(cachedPlayers[account].transactions)
-        MySQL.prepare("INSERT INTO player_transactions (id, transactions) VALUES (?, ?) ON DUPLICATE KEY UPDATE transactions = ?", {
-            account, transactions, transactions
+        MySQL.prepare("INSERT INTO banking_transactions (identifier, trans_id, title, amount, trans_type, receiver, issuer, time, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",{
+            account, transaction.trans_id, transaction.title, transaction.amount, transaction.trans_type, transaction.receiver, transaction.issuer, transaction.time, transaction.message
         })
     else
         print(locale("invalid_account", account))
@@ -386,7 +396,7 @@ RegisterNetEvent('Renewed-Banking:server:createNewAccount', function(accountid)
 
     }
     cachedPlayers[cid].accounts[#cachedPlayers[cid].accounts+1] = accountid
-    MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, ?) ",{
+    MySQL.insert("INSERT INTO bank_accounts_new (id, amount, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?) ",{
         accountid, cachedAccounts[accountid].amount, json.encode(cachedAccounts[accountid].transactions), json.encode({cid}), cachedAccounts[accountid].frozen, cid
     })
 end)
@@ -665,7 +675,7 @@ end
 
 local createTables = {
     { query = "CREATE TABLE IF NOT EXISTS `bank_accounts_new` (`id` varchar(50) NOT NULL, `amount` int(11) DEFAULT 0, `transactions` longtext DEFAULT '[]', `auth` longtext DEFAULT '[]', `isFrozen` int(11) DEFAULT 0, `creator` varchar(50) DEFAULT NULL, PRIMARY KEY (`id`));", values = nil },
-    { query = "CREATE TABLE IF NOT EXISTS `player_transactions` (`id` varchar(50) NOT NULL, `isFrozen` int(11) DEFAULT 0, `transactions` longtext DEFAULT '[]', PRIMARY KEY (`id`));", values = nil }
+    { query = "CREATE TABLE IF NOT EXISTS `banking_transactions` (`identifier` varchar(30) NOT NULL,`trans_id` varchar(36) NOT NULL,`title` text NOT NULL,`amount` int(11) NOT NULL,`trans_type` varchar(10) NOT NULL,`message` text NOT NULL,`receiver` text NOT NULL,`issuer` text NOT NULL,`time` int(11) NOT NULL,PRIMARY KEY (`identifier`,`trans_id`),UNIQUE KEY `identifier` (`identifier`,`trans_id`),KEY `identifier_2` (`identifier`,`trans_id`));", values = nil }
 }
 
 assert(MySQL.transaction.await(createTables), "Failed to create tables")

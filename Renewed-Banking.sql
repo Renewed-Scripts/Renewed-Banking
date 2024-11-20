@@ -8,9 +8,17 @@ CREATE TABLE IF NOT EXISTS `bank_accounts_new` (
   PRIMARY KEY (`id`)
 );
 
-CREATE TABLE IF NOT EXISTS `player_transactions` (
-  `id` varchar(50) NOT NULL,
-  `isFrozen` int(11) DEFAULT 0,
-  `transactions` longtext DEFAULT '[]',
-  PRIMARY KEY (`id`)
+CREATE TABLE IF NOT EXISTS `banking_transactions` (
+  `identifier` varchar(30) NOT NULL,
+  `trans_id` varchar(36) NOT NULL,
+  `title` text NOT NULL,
+  `amount` int(11) NOT NULL,
+  `trans_type` varchar(10) NOT NULL,
+  `message` text NOT NULL,
+  `receiver` text NOT NULL,
+  `issuer` text NOT NULL,
+  `time` int(11) NOT NULL,
+  PRIMARY KEY (`identifier`,`trans_id`),
+  UNIQUE KEY `identifier` (`identifier`,`trans_id`),
+  KEY `identifier_2` (`identifier`,`trans_id`)
 );
