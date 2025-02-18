@@ -556,18 +556,35 @@ RegisterNetEvent('Renewed-Banking:server:changeAccountName', function(account, n
     updateAccountName(account, newName, source)
 end) exports("changeAccountName", updateAccountName)-- Should only use this on very secure backends to avoid anyone using this as this is a server side ONLY export --
 
+--- Creates a shared job account for an organization/society.
+-- @param job (table) A table containing job account details:
+--        job.name (string) - The unique identifier for the job (e.g., "mechanic", "police").
+--        job.label (string) - The display name/label for the job (e.g., "Mechanic", "Police Department").
+-- @param initialBalance (number, optional) The starting balance of the account. Default is 0.
+-- @return (boolean, string) Returns `true, "Success"` on successful creation, or `false, "Error message"` on failure.
 local function CreateJobAccount(job, initialBalance)
-    -- job.name = job name/society name
-    -- job.label = job label/society label
-    -- initialBalance(int): (optional) amount for account to start with
-    if type(job) ~= 'table' or not job.name or not job.label then return end
+    -- Validate input parameters
+    if not job or type(job) ~= "table" then
+        return false, "Invalid parameter: expected a table (job)"
+    end
 
+    if not job.name or type(job.name) ~= "string" or job.name == "" then
+        return false, "Invalid job name: expected a non-empty string"
+    end
+
+    if not job.label or type(job.label) ~= "string" or job.label == "" then
+        return false, "Invalid job label: expected a non-empty string"
+    end
+    
     -- check if account already exist?
-    if cachedAccounts[job.name] then return cachedAccounts[job.name] end
+    if cachedAccounts[job.name] then
+        return false, "account already exists"
+    end
 
+    -- Create the job account in cache
     cachedAccounts[job.name] = {
         id = job.name,
-        type = locale('org'),
+        type = locale("org"),
         name = job.label,
         frozen = 0,
         amount = initialBalance or 0,
@@ -576,13 +593,22 @@ local function CreateJobAccount(job, initialBalance)
         creator = nil
     }
 
-    MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, NULL) ",{
-        job.name, cachedAccounts[job.name].amount, json.encode(cachedAccounts[job.name].transactions), json.encode({}), cachedAccounts[job.name].frozen
+    local success, errorMsg = MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, NULL)", {
+        job.name,
+        cachedAccounts[job.name].amount,
+        json.encode(cachedAccounts[job.name].transactions), -- Convert transactions to JSON
+        json.encode(cachedAccounts[job.name].auth), -- Convert auth list to JSON
+        cachedAccounts[job.name].frozen
     })
 
-    return cachedAccounts[job.name]
+    -- Handle potential database errors
+    if not success then
+        return false, "Database error: " .. tostring(errorMsg)
+    end
+
+    return true, "success"
 end
-exports('CreateJobAccount', CreateJobAccount)
+exports("CreateJobAccount", CreateJobAccount)
 
 local function addAccountMember(account, member)
     if not account or not member then return end
