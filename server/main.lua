@@ -556,6 +556,17 @@ RegisterNetEvent('Renewed-Banking:server:changeAccountName', function(account, n
     updateAccountName(account, newName, source)
 end) exports("changeAccountName", updateAccountName)-- Should only use this on very secure backends to avoid anyone using this as this is a server side ONLY export --
 
+--- Retrieves a cached job account if it exists.
+---@param jobName string The name of the job whose account is being retrieved.
+---@return table|nil account Returns the job account if it exists, otherwise `nil`.
+function GetJobAccount(jobName)
+    if type(jobName) ~= "string" or jobName == "" then
+        error(("^5[%s]^7-^1[ERROR]^7 %s"):format(GetInvokingResource(), "Invalid job name: expected a non-empty string"))
+    end
+    return cachedAccounts[jobName] or nil -- Returns account if found, otherwise nil
+end
+exports('GetJobAccount', GetJobAccount)
+
 --- Creates a shared job account for an organization/society.
 --- @param job table A table containing job account details:
 ---        job.name string - The unique identifier for the job (e.g., "mechanic", "police").
