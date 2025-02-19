@@ -556,6 +556,75 @@ RegisterNetEvent('Renewed-Banking:server:changeAccountName', function(account, n
     updateAccountName(account, newName, source)
 end) exports("changeAccountName", updateAccountName)-- Should only use this on very secure backends to avoid anyone using this as this is a server side ONLY export --
 
+--- Retrieves a cached job account if it exists.
+---@param jobName string The name of the job whose account is being retrieved.
+---@return table|nil account Returns the job account if it exists, otherwise `nil`.
+function GetJobAccount(jobName)
+    if type(jobName) ~= "string" or jobName == "" then
+        error(("^5[%s]^7-^1[ERROR]^7 %s"):format(GetInvokingResource(), "Invalid job name: expected a non-empty string"))
+    end
+    return cachedAccounts[jobName] or nil -- Returns account if found, otherwise nil
+end
+exports('GetJobAccount', GetJobAccount)
+
+--- Creates a shared job account for an organization/society.
+--- @param job table A table containing job account details:
+---        job.name string - The unique identifier for the job (e.g., "mechanic", "police").
+---        job.label string - The display name/label for the job (e.g., "Mechanic", "Police Department").
+--- @param initialBalance number? The starting balance of the account. Default is 0.
+--- @return table Returns the account table if found or successfully created. This function may raise an error if validation or database insertion fails.
+local function CreateJobAccount(job, initialBalance)
+    local currentResourceName = GetInvokingResource()
+
+    -- Validate input parameters
+    if type(job) ~= "table" then
+        error(("^5[%s]^7-^1[ERROR]^7 %s"):format(currentResourceName, "Invalid parameter: expected a table (job)"))
+    end
+
+
+    if type(job.name) ~= "string" or job.name == "" then
+        error(("^5[%s]^7-^1[ERROR]^7 %s"):format(currentResourceName, "Invalid job name: expected a non-empty string"))
+    end
+
+    if type(job.label) ~= "string" or job.label == "" then
+        error(("^5[%s]^7-^1[ERROR]^7 %s"):format(currentResourceName, "Invalid job label: expected a non-empty string"))
+    end
+    
+    -- Check if account already exists
+    if cachedAccounts[job.name] then
+        return cachedAccounts[job.name]
+    end
+
+    -- Create the job account in cache
+    cachedAccounts[job.name] = {
+        id = job.name,
+        type = locale("org"),
+        name = job.label,
+        frozen = 0,
+        amount = tonumber(initialBalance) or 0,
+        transactions = {},
+        auth = {},
+        creator = nil
+    }
+
+    local success, errorMsg = MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, NULL)", {
+        job.name,
+        cachedAccounts[job.name].amount,
+        json.encode(cachedAccounts[job.name].transactions), -- Convert transactions to JSON
+        json.encode(cachedAccounts[job.name].auth), -- Convert auth list to JSON
+        cachedAccounts[job.name].frozen
+    })
+
+    -- Handle potential database errors
+    if not success then
+	cachedAccounts[job.name] = nil
+        error(("^5[%s]^7-^1[ERROR]^7 %s"):format(currentResourceName, "Database error: " .. tostring(errorMsg)))
+    end
+
+    return cachedAccounts[job.name]
+end
+exports("CreateJobAccount", CreateJobAccount)
+
 local function addAccountMember(account, member)
     if not account or not member then return end
 
@@ -575,7 +644,8 @@ local function addAccountMember(account, member)
     cachedAccounts[account].auth[targetCID] = true
     MySQL.update('UPDATE bank_accounts_new SET auth = ? WHERE id = ?',{json.encode(auth), account})
 
-end exports("addAccountMember", addAccountMember)
+end
+exports("addAccountMember", addAccountMember)
 
 local function removeAccountMember(account, member)
     local Player2 = getPlayerData(false, member)
