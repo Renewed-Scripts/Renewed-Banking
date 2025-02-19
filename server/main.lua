@@ -617,6 +617,7 @@ local function CreateJobAccount(job, initialBalance)
 
     -- Handle potential database errors
     if not success then
+	cachedAccounts[job.name] = nil
         error(("^5[%s]^7-^1[ERROR]^7 %s"):format(currentResourceName, "Database error: " .. tostring(errorMsg)))
     end
 
