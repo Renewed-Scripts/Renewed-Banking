@@ -557,28 +557,31 @@ RegisterNetEvent('Renewed-Banking:server:changeAccountName', function(account, n
 end) exports("changeAccountName", updateAccountName)-- Should only use this on very secure backends to avoid anyone using this as this is a server side ONLY export --
 
 --- Creates a shared job account for an organization/society.
--- @param job (table) A table containing job account details:
---        job.name (string) - The unique identifier for the job (e.g., "mechanic", "police").
---        job.label (string) - The display name/label for the job (e.g., "Mechanic", "Police Department").
--- @param initialBalance (number, optional) The starting balance of the account. Default is 0.
--- @return (boolean, string) Returns `true, "Success"` on successful creation, or `false, "Error message"` on failure.
+--- @param job table A table containing job account details:
+---        job.name string - The unique identifier for the job (e.g., "mechanic", "police").
+---        job.label string - The display name/label for the job (e.g., "Mechanic", "Police Department").
+--- @param initialBalance number? The starting balance of the account. Default is 0.
+--- @return table Returns the account table if found or successfully created. This function may raise an error if validation or database insertion fails.
 local function CreateJobAccount(job, initialBalance)
+    local currentResourceName = GetInvokingResource()
+
     -- Validate input parameters
-    if not job or type(job) ~= "table" then
-        return false, "Invalid parameter: expected a table (job)"
+    if type(job) ~= "table" then
+        error(("^5[%s]^7-^1[ERROR]^7 %s"):format(currentResourceName, "Invalid parameter: expected a table (job)"))
     end
 
-    if not job.name or type(job.name) ~= "string" or job.name == "" then
-        return false, "Invalid job name: expected a non-empty string"
+
+    if type(job.name) ~= "string" or job.name == "" then
+        error(("^5[%s]^7-^1[ERROR]^7 %s"):format(currentResourceName, "Invalid job name: expected a non-empty string"))
     end
 
-    if not job.label or type(job.label) ~= "string" or job.label == "" then
-        return false, "Invalid job label: expected a non-empty string"
+    if type(job.label) ~= "string" or job.label == "" then
+        error(("^5[%s]^7-^1[ERROR]^7 %s"):format(currentResourceName, "Invalid job label: expected a non-empty string"))
     end
     
-    -- check if account already exist?
+    -- Check if account already exists
     if cachedAccounts[job.name] then
-        return false, "account already exists"
+        return cachedAccounts[job.name]
     end
 
     -- Create the job account in cache
@@ -587,7 +590,7 @@ local function CreateJobAccount(job, initialBalance)
         type = locale("org"),
         name = job.label,
         frozen = 0,
-        amount = initialBalance or 0,
+        amount = tonumber(initialBalance) or 0,
         transactions = {},
         auth = {},
         creator = nil
@@ -603,10 +606,10 @@ local function CreateJobAccount(job, initialBalance)
 
     -- Handle potential database errors
     if not success then
-        return false, "Database error: " .. tostring(errorMsg)
+        error(("^5[%s]^7-^1[ERROR]^7 %s"):format(currentResourceName, "Database error: " .. tostring(errorMsg)))
     end
 
-    return true, "success"
+    return cachedAccounts[job.name]
 end
 exports("CreateJobAccount", CreateJobAccount)
 
