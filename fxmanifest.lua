@@ -1,6 +1,6 @@
 fx_version 'cerulean'
 game 'gta5'
-version '2.1.3'
+version '2.1.4'
 
 description 'Renewed Banking'
 Author "uShifty#1733"
