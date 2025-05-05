@@ -148,7 +148,7 @@ function CreatePeds()
         SetBlipColour (blips[k], 2)
         SetBlipAsShortRange(blips[k], true)
         BeginTextCommandSetBlipName('STRING')
-        AddTextComponentString('Bank')
+        AddTextComponentString(locale('bank'))
         EndTextCommandSetBlipName(blips[k])
     end
     pedSpawned = true
